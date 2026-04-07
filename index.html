@@ -41,29 +41,26 @@ h1 {
 </div>
 
 <script>
-const sheetURL = 'https://docs.google.com/spreadsheets/d/1dFEvDQNXRpQpw1YdBcuAivH6N7_ukJX-rakE6WFXxMk/edit?usp=sharing';
+const sheetURL = 'https://docs.google.com/spreadsheets/d/1dFEvDQNXRpQpw1YdBcuAivH6N7_ukJX-rakE6WFXxMk/export?format=csv';
 
-function loadComments() {
-    fetch(sheetURL)
-    .then(response => response.text())
-    .then(data => {
-        const rows = data.split('\n').slice(1);
-        let html = '';
+async function loadComments() {
+    const response = await fetch(sheetURL);
+    const data = await response.text();
 
-        rows.reverse().forEach(row => {
-            const cols = row.split(',');
+    const rows = data.trim().split('\n').slice(1);
 
-            if(cols[1]) {
-                html += `
-                    <div class="comment-box">
-                        ${cols[1]}
-                    </div>
-                `;
-            }
-        });
+    let html = '';
 
-        document.getElementById('comments').innerHTML = html;
+    rows.reverse().forEach(row => {
+        const firstComma = row.indexOf(',');
+        const comment = row.substring(firstComma + 1).replace(/^"|"$/g, '');
+
+        if (comment) {
+            html += `<div class="comment-box">${comment}</div>`;
+        }
     });
+
+    document.getElementById('comments').innerHTML = html;
 }
 
 loadComments();
