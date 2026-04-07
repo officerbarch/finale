@@ -1,43 +1,73 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>H.V.A.C</title>
-    <style>
-        body {
-            font-family: Arial;
-            max-width: 800px;
-            margin: auto;
-            padding: 20px;
-        }
-        .comment {
-            border-bottom: 1px solid #ddd;
-            padding: 10px 0;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Live Comments</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f5f5f5;
+    margin: 0;
+    padding: 30px;
+}
+
+.container {
+    max-width: 800px;
+    margin: auto;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.comment-box {
+    background: white;
+    border-radius: 10px;
+    padding: 15px 20px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+</style>
 </head>
+
 <body>
 
-<h2>Live Comments</h2>
-<div id="comments"></div>
+<div class="container">
+    <h1>H.V.A.C</h1>
+    <div id="comments"></div>
+</div>
 
 <script>
-fetch('https://docs.google.com/spreadsheets/d/1dFEvDQNXRpQpw1YdBcuAivH6N7_ukJX-rakE6WFXxMk/edit?usp=sharing')
-.then(response => response.text())
-.then(data => {
-    const rows = data.split('\n').slice(1);
-    let html = '';
-    rows.reverse().forEach(row => {
-        const cols = row.split(',');
-        html += `
-            <div class="comment">
-                <strong>${cols[1]}</strong><br>
-                ${cols[2]}<br>
-                <small>${cols[0]}</small>
-            </div>
-        `;
+const sheetURL = 'https://docs.google.com/spreadsheets/d/1dFEvDQNXRpQpw1YdBcuAivH6N7_ukJX-rakE6WFXxMk/edit?usp=sharing';
+
+function loadComments() {
+    fetch(sheetURL)
+    .then(response => response.text())
+    .then(data => {
+        const rows = data.split('\n').slice(1);
+        let html = '';
+
+        rows.reverse().forEach(row => {
+            const cols = row.split(',');
+
+            if(cols[1]) {
+                html += `
+                    <div class="comment-box">
+                        ${cols[1]}
+                    </div>
+                `;
+            }
+        });
+
+        document.getElementById('comments').innerHTML = html;
     });
-    document.getElementById('comments').innerHTML = html;
-});
+}
+
+loadComments();
+setInterval(loadComments, 10000);
 </script>
 
 </body>
