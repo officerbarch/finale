@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Live Comments</title>
+    <style>
+        body {
+            font-family: Arial;
+            max-width: 800px;
+            margin: auto;
+            padding: 20px;
+        }
+        .comment {
+            border-bottom: 1px solid #ddd;
+            padding: 10px 0;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Live Comments</h2>
+<div id="comments"></div>
+
+<script>
+fetch('https://docs.google.com/spreadsheets/d/1dFEvDQNXRpQpw1YdBcuAivH6N7_ukJX-rakE6WFXxMk/edit?usp=sharing')
+.then(response => response.text())
+.then(data => {
+    const rows = data.split('\n').slice(1);
+    let html = '';
+    rows.reverse().forEach(row => {
+        const cols = row.split(',');
+        html += `
+            <div class="comment">
+                <strong>${cols[1]}</strong><br>
+                ${cols[2]}<br>
+                <small>${cols[0]}</small>
+            </div>
+        `;
+    });
+    document.getElementById('comments').innerHTML = html;
+});
+</script>
+
+</body>
+</html>
