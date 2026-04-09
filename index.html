@@ -21,16 +21,22 @@ body {
 h1 {
     text-align: center;
     margin-bottom: 30px;
+    color: #222;
 }
 
 .comment-box {
     background: white;
-    border-radius: 10px;
-    padding: 15px 20px;
-    margin-bottom: 15px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    border-radius: 12px;
+    padding: 18px 22px;
+    margin-bottom: 18px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
     line-height: 1.7;
     white-space: pre-line;
+    transition: transform 0.2s ease;
+}
+
+.comment-box:hover {
+    transform: translateY(-2px);
 }
 </style>
 </head>
@@ -45,28 +51,68 @@ h1 {
 <script>
 const sheetURL = 'https://docs.google.com/spreadsheets/d/1jaO6kwbXqLBFzHAI9KphFX95Pxdsrgxybdg48oLhAmM/export?format=csv';
 
-async function loadComments() {
-    const response = await fetch(sheetURL);
-    const data = await response.text();
+function parseCSV(text) {
+    const rows = [];
+    let row = [];
+    let cell = '';
+    let insideQuotes = false;
 
-    const rows = data.trim().split('\n').slice(1);
+    for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+        const nextChar = text[i + 1];
 
-    let html = '';
-
-    rows.reverse().forEach(row => {
-        // hanya ambil kolom A
-        const firstCell = row.split(',')[0].replace(/^"|"$/g, '');
-
-        if (firstCell.trim()) {
-            html += `
-                <div class="comment-box">
-                    ${firstCell}
-                </div>
-            `;
+        if (char === '"' && insideQuotes && nextChar === '"') {
+            cell += '"';
+            i++;
+        } else if (char === '"') {
+            insideQuotes = !insideQuotes;
+        } else if (char === ',' && !insideQuotes) {
+            row.push(cell);
+            cell = '';
+        } else if (char === '\n' && !insideQuotes) {
+            row.push(cell);
+            rows.push(row);
+            row = [];
+            cell = '';
+        } else {
+            cell += char;
         }
-    });
+    }
 
-    document.getElementById('comments').innerHTML = html;
+    if (cell) {
+        row.push(cell);
+        rows.push(row);
+    }
+
+    return rows;
+}
+
+async function loadComments() {
+    try {
+        const response = await fetch(sheetURL);
+        const csvText = await response.text();
+
+        const rows = parseCSV(csvText).slice(1);
+
+        let html = '';
+
+        rows.reverse().forEach(row => {
+            const firstCell = row[0]?.trim();
+
+            if (firstCell) {
+                html += `
+                    <div class="comment-box">
+                        ${firstCell}
+                    </div>
+                `;
+            }
+        });
+
+        document.getElementById('comments').innerHTML = html;
+
+    } catch (error) {
+        console.error('Error loading data:', error);
+    }
 }
 
 loadComments();
