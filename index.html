@@ -6,38 +6,43 @@
 <title>Tanya Jawab Tugas Akhir (Genap 2025/2026)</title>
 
 <style>
-body {
-    font-family: Arial, sans-serif;
-    background: #f5f5f5;
-    margin: 0;
-    padding: 30px;
-}
+    body {
+        font-family: 'Segoe UI', Arial, sans-serif;
+        background: #ffffff;
+        margin: 0;
+        padding: 30px;
+    }
 
-.container {
-    max-width: 800px;
-    margin: auto;
-}
+    .container {
+        max-width: 800px;
+        margin: auto;
+    }
 
-h1 {
-    text-align: center;
-    margin-bottom: 30px;
-    color: #222;
-}
+    h1 {
+        text-align: center;
+        margin-bottom: 40px;
+        color: #000;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
 
-.comment-box {
-    background: white;
-    border-radius: 12px;
-    padding: 18px 22px;
-    margin-bottom: 18px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-    line-height: 1.7;
-    white-space: pre-line;
-    transition: transform 0.2s ease;
-}
+    /* GAYA BARU: KUNING, TEKS HITAM, OUTLINE HITAM, TANPA SHADOW */
+    .comment-box {
+        background: #fff000; /* Warna kuning solid */
+        color: #000;         /* Teks hitam pekat */
+        border: 2px solid #000; /* Outline garis hitam tegas */
+        border-radius: 0px;  /* Sudut tajam untuk kesan analitis/teknis */
+        padding: 20px;
+        margin-bottom: 20px;
+        line-height: 1.7;
+        white-space: pre-line;
+        box-shadow: none;    /* Menghapus bayangan */
+        transition: background 0.2s ease;
+    }
 
-.comment-box:hover {
-    transform: translateY(-2px);
-}
+    .comment-box:hover {
+        background: #ffe600; /* Sedikit perubahan warna saat hover tanpa efek bayangan */
+    }
 </style>
 </head>
 
@@ -51,6 +56,7 @@ h1 {
 <script>
 const sheetURL = 'https://docs.google.com/spreadsheets/d/1jaO6kwbXqLBFzHAI9KphFX95Pxdsrgxybdg48oLhAmM/export?format=csv';
 
+// Fungsi parser CSV untuk menangani kutipan ganda dan baris baru dalam sel
 function parseCSV(text) {
     const rows = [];
     let row = [];
@@ -79,7 +85,7 @@ function parseCSV(text) {
         }
     }
 
-    if (cell) {
+    if (cell || row.length > 0) {
         row.push(cell);
         rows.push(row);
     }
@@ -89,14 +95,19 @@ function parseCSV(text) {
 
 async function loadComments() {
     try {
-        const response = await fetch(sheetURL);
+        // Menambahkan cache buster agar data selalu terbaru
+        const response = await fetch(`${sheetURL}&t=${new Date().getTime()}`);
         const csvText = await response.text();
 
-        const rows = parseCSV(csvText).slice(1);
+        // Mengambil baris data dan melewati header
+        const allRows = parseCSV(csvText);
+        const dataRows = allRows.slice(1);
 
         let html = '';
 
-        rows.reverse().forEach(row => {
+        // Memproses dari baris paling bawah (terbaru)
+        dataRows.reverse().forEach(row => {
+            // HANYA mengambil kolom A (indeks 0)
             const firstCell = row[0]?.trim();
 
             if (firstCell) {
@@ -108,14 +119,16 @@ async function loadComments() {
             }
         });
 
-        document.getElementById('comments').innerHTML = html;
+        document.getElementById('comments').innerHTML = html || '<p style="text-align:center;">Tidak ada data ditemukan di kolom A.</p>';
 
     } catch (error) {
         console.error('Error loading data:', error);
+        document.getElementById('comments').innerHTML = '<p style="text-align:center; color:red;">Gagal memuat data. Periksa koneksi atau izin sharing spreadsheet.</p>';
     }
 }
 
 loadComments();
+// Refresh data setiap 10 detik
 setInterval(loadComments, 10000);
 </script>
 
