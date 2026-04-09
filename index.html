@@ -1,40 +1,39 @@
 async function loadComments() {
-    const response = await fetch(sheetURL);
-    const data = await response.text();
+    try {
+        const response = await fetch(sheetURL);
+        const data = await response.text();
 
-    // Regex ini memecah baris berdasarkan baris baru (\n atau \r\n) 
-    // TAPI mengabaikan baris baru yang berada di dalam tanda kutip dua (isi sel).
-    const rows = data.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/gm) || [];
-    
-    /* Pendekatan Alternatif yang lebih sederhana namun akurat:
-       Memecah string berdasarkan baris baru yang tidak berada di dalam kutipan.
-    */
-    const cleanRows = data.trim().split(/\r?\n(?=(?:(?:[^"]*"){2})*[^"]*$)/).slice(1);
+        // Menggunakan regex untuk memecah baris agar sel yang memiliki 
+        // "Enter" di dalamnya tidak terpecah menjadi blok baru.
+        const rows = data.trim().split(/\r?\n(?=(?:(?:[^"]*"){2})*[^"]*$)/).slice(1);
 
-    let html = '';
+        let html = '';
 
-    cleanRows.reverse().forEach(row => {
-        // Mengambil isi Kolom A dengan menangani kasus teks yang dibungkus tanda kutip
-        let columnAContent = '';
-        
-        // Regex untuk mengambil elemen pertama sebelum koma pertama yang tidak di dalam kutipan
-        const match = row.match(/^(".*?"|[^,]+)/);
-        
-        if (match) {
-            columnAContent = match[0]
-                .replace(/^"|"$/g, '') // Menghapus kutipan di awal/akhir
-                .replace(/""/g, '"')   // Mengubah double-quote CSV menjadi single-quote
-                .trim();
-        }
+        rows.reverse().forEach(row => {
+            // Mengambil hanya kolom A
+            // Regex ini menangkap teks di dalam kutipan atau teks sebelum koma pertama
+            const match = row.match(/^(".*?"|[^,]+)/);
+            let columnAContent = '';
 
-        if (columnAContent) {
-            html += `
-                <div class="comment-box">
-                    ${columnAContent.replace(/\n/g, '<br>')} 
-                </div>
-            `;
-        }
-    });
+            if (match) {
+                columnAContent = match[0]
+                    .replace(/^"|"$/g, '') // Hapus kutipan pembungkus
+                    .replace(/""/g, '"')   // Ubah double quote menjadi single
+                    .trim();
+            }
 
-    document.getElementById('comments').innerHTML = html;
+            if (columnAContent) {
+                html += `
+                    <div class="comment-box">
+                        ${columnAContent.replace(/\n/g, '<br>')}
+                    </div>
+                `;
+            }
+        });
+
+        document.getElementById('comments').innerHTML = html;
+    } catch (error) {
+        console.error("Gagal memuat data:", error);
+        document.getElementById('comments').innerHTML = "Gagal memuat referensi data.";
+    }
 }
