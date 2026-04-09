@@ -1,65 +1,31 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tanya Jawab Tugas Akhir</title>
-
-<style>
-body {
-    font-family: Arial, sans-serif;
-    background: #f5f5f5;
-    margin: 0;
-    padding: 30px;
-}
-
-.container {
-    max-width: 800px;
-    margin: auto;
-}
-
-h1 {
-    text-align: center;
-    margin-bottom: 30px;
-}
-
-.comment-box {
-    background: white;
-    border-radius: 10px;
-    padding: 15px 20px;
-    margin-bottom: 15px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-    line-height: 1.5;
-}
-</style>
-</head>
-
-<body>
-
-<div class="container">
-    <h1>Tanya Jawab Tugas Akhir</h1>
-    <div id="comments"></div>
-</div>
-
-<script>
-const sheetURL = 'https://docs.google.com/spreadsheets/d/1jaO6kwbXqLBFzHAI9KphFX95Pxdsrgxybdg48oLhAmM/export?format=csv';
-
 async function loadComments() {
     const response = await fetch(sheetURL);
     const data = await response.text();
 
+    // Memecah berdasarkan baris (setiap baris merepresentasikan satu baris di Spreadsheet)
     const rows = data.trim().split('\n').slice(1);
 
     let html = '';
 
     rows.reverse().forEach(row => {
+        // Logika untuk mengambil HANYA kolom A:
+        // Kita mencari indeks koma pertama untuk memisahkan Kolom A dengan kolom lainnya
         const firstComma = row.indexOf(',');
-        const comment = row.substring(firstComma + 1).replace(/^"|"$/g, '');
+        
+        let columnAContent = '';
+        if (firstComma !== -1) {
+            // Mengambil teks sebelum koma pertama (Kolom A)
+            columnAContent = row.substring(0, firstComma).replace(/^"|"$/g, '').trim();
+        } else {
+            // Jika tidak ada koma, berarti hanya ada satu kolom
+            columnAContent = row.replace(/^"|"$/g, '').trim();
+        }
 
-        if (comment) {
+        // Membuat 1 box untuk 1 sel di kolom A
+        if (columnAContent) {
             html += `
                 <div class="comment-box">
-                    ${comment}
+                    ${columnAContent}
                 </div>
             `;
         }
@@ -67,10 +33,3 @@ async function loadComments() {
 
     document.getElementById('comments').innerHTML = html;
 }
-
-loadComments();
-setInterval(loadComments, 10000);
-</script>
-
-</body>
-</html>
