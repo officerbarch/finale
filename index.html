@@ -3,125 +3,186 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TA Talk: Ask Anything (Genap 2025/2026)</title>
+<title>TA Talk: Ask Anything</title>
 
-<!-- TAMBAHAN: Import Roboto -->
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
 
 <style>
-    body {
-        font-family: 'Roboto', Arial, sans-serif; /* DIUBAH DI SINI */
-        background: #ffffff;
-        margin: 0;
-        padding: 30px;
-    }
+body {
+    font-family: 'Roboto', Arial, sans-serif;
+    background: #ffffff;
+    margin: 0;
+    padding: 30px;
+}
 
-    .container {
-        max-width: 800px;
-        margin: auto;
-    }
+.container {
+    max-width: 1200px;
+    margin: auto;
+}
 
-    h1 {
-        text-align: center;
-        margin-bottom: 40px;
-        color: #000;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-    }
+h1 {
+    text-align: center;
+    margin-bottom: 40px;
+    color: #000;
+    text-transform: uppercase;
+}
 
-    /* GAYA BARU: KUNING, TEKS HITAM, OUTLINE HITAM, TANPA SHADOW */
-    .comment-box {
-        background: #FFFFE0;
-        color: #000;
-        border: 2px solid #000;
-        border-radius: 6px;
-        padding: 10px;
-        margin-bottom: 10px;
-        line-height: 1.5;
-        white-space: pre-line;
-        box-shadow: none;
-        transition: background 0.2s ease;
-    }
+/* 🔥 GRID */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+}
 
-    .comment-box:hover {
-        background: #FAFAD2;
-    }
+/* 🔳 CARD */
+.comment-box {
+    background: #FFFFE0;
+    border: 2px solid #000;
+    border-radius: 8px;
+    padding: 12px;
+    line-height: 1.5;
+    transition: transform 0.2s ease;
+}
+
+.comment-box:hover {
+    transform: translateY(-4px);
+    background: #FAFAD2;
+}
+
+/* TEXT */
+.comment-text {
+    white-space: pre-line;
+}
+
+/* IMAGE */
+.comment-box img {
+    width: 100%;
+    margin-top: 10px;
+    border-radius: 6px;
+}
+
+/* SECTION TITLE */
+.section-title {
+    margin-top: 40px;
+    margin-bottom: 10px;
+    font-weight: 500;
+}
 </style>
 </head>
 
 <body>
 
 <div class="container">
-    <h1>TA Talk: Ask Anything (Genap 2025/2026)</h1>
+    <h1>TA Talk: Ask Anything</h1>
     <div id="comments"></div>
 </div>
 
 <script>
 const sheetURL = 'https://docs.google.com/spreadsheets/d/1jaO6kwbXqLBFzHAI9KphFX95Pxdsrgxybdg48oLhAmM/export?format=csv';
 
+// CSV parser aman
 function parseCSV(text) {
     const rows = [];
-    let row = [];
-    let cell = '';
-    let insideQuotes = false;
+    let row = [], cell = '', insideQuotes = false;
 
     for (let i = 0; i < text.length; i++) {
-        const char = text[i];
-        const nextChar = text[i + 1];
+        const char = text[i], next = text[i + 1];
 
-        if (char === '"' && insideQuotes && nextChar === '"') {
-            cell += '"';
-            i++;
+        if (char === '"' && insideQuotes && next === '"') {
+            cell += '"'; i++;
         } else if (char === '"') {
             insideQuotes = !insideQuotes;
         } else if (char === ',' && !insideQuotes) {
-            row.push(cell);
-            cell = '';
+            row.push(cell); cell = '';
         } else if (char === '\n' && !insideQuotes) {
-            row.push(cell);
-            rows.push(row);
-            row = [];
-            cell = '';
+            row.push(cell); rows.push(row);
+            row = []; cell = '';
         } else {
             cell += char;
         }
     }
 
-    if (cell || row.length > 0) {
-        row.push(cell);
-        rows.push(row);
+    if (cell || row.length) {
+        row.push(cell); rows.push(row);
     }
 
     return rows;
 }
 
+// convert link drive → image
+function convertDriveLink(url) {
+    const match = url.match(/\/d\/(.*?)\//);
+    return match ? `https://drive.google.com/uc?export=view&id=${match[1]}` : url;
+}
+
+// cluster waktu
+function getDateGroup(dateStr) {
+    const now = new Date();
+    const d = new Date(dateStr);
+
+    const diff = (now - d) / (1000 * 60 * 60 * 24);
+
+    if (diff < 1) return "Hari ini";
+    if (diff < 2) return "Kemarin";
+    return "Sebelumnya";
+}
+
 async function loadComments() {
     try {
-        const response = await fetch(`${sheetURL}&t=${new Date().getTime()}`);
-        const csvText = await response.text();
+        const response = await fetch(`${sheetURL}&t=${Date.now()}`);
+        const text = await response.text();
 
-        const allRows = parseCSV(csvText);
-        const dataRows = allRows.slice(1);
+        const rows = parseCSV(text).slice(1);
+
+        const groups = {
+            "Hari ini": [],
+            "Kemarin": [],
+            "Sebelumnya": []
+        };
+
+        rows.forEach(row => {
+            const time = row[0];
+            const content = row[1];
+            let image = row[2];
+
+            if (!content && !image) return;
+
+            let imgHTML = '';
+
+            if (image && image.startsWith('http')) {
+                image = convertDriveLink(image);
+                imgHTML = `<img src="${image}">`;
+            }
+
+            const card = `
+                <div class="comment-box">
+                    <div class="comment-text">${content || ''}</div>
+                    ${imgHTML}
+                </div>
+            `;
+
+            const group = getDateGroup(time);
+            groups[group].push(card);
+        });
 
         let html = '';
 
-        dataRows.reverse().forEach(row => {
-            const firstCell = row[0]?.trim();
-
-            if (firstCell) {
+        Object.keys(groups).forEach(group => {
+            if (groups[group].length > 0) {
                 html += `
-                    <div class="comment-box">
-                        ${firstCell}
+                    <div class="section-title">${group}</div>
+                    <div class="grid">
+                        ${groups[group].join('')}
                     </div>
                 `;
             }
         });
 
-        document.getElementById('comments').innerHTML = html || '<p style="text-align:center;">Tidak ada data ditemukan di kolom A.</p>';
+        document.getElementById('comments').innerHTML = html;
 
     } catch (error) {
-        console.error('Error loading data:', error);
-        document.getElementById('comments').innerHTML = '<p style="text-align:center; color:red;">Gagal memuat data. Periksa koneksi atau izin sharing spreadsheet.</p>';
+        console.error(error);
+        document.getElementById('comments').innerHTML = 'Gagal load data';
     }
 }
 
