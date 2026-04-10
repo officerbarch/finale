@@ -25,6 +25,7 @@ function parseCSV(text) {
 
 function convertDriveLink(url) {
     const match = url.match(/\/d\/(.*?)\//);
+    // Perbaikan pada template literal di bawah ini
     return match ? `https://lh3.googleusercontent.com/u/0/d/${match[1]}` : url;
 }
 
