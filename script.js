@@ -12,6 +12,9 @@ function parseCSV(text) {
             insideQuotes = !insideQuotes;
         } else if (char === ',' && !insideQuotes) {
             row.push(cell); cell = '';
+        } else if (char === '\r') {
+            // Abaikan carriage return
+            continue;
         } else if (char === '\n' && !insideQuotes) {
             row.push(cell); rows.push(row);
             row = []; cell = '';
@@ -25,24 +28,30 @@ function parseCSV(text) {
 
 function convertDriveLink(url) {
     const match = url.match(/\/d\/(.*?)\//);
-    // Perbaikan pada template literal di bawah ini
+    // PERBAIKAN: Menggunakan tanda $ untuk variabel dalam template literal
     return match ? `https://lh3.googleusercontent.com/u/0/d/${match[1]}` : url;
 }
 
 function findImage(row) {
     for (let cell of row) {
-        if (cell && cell.includes('http')) return cell;
+        if (cell && (cell.includes('http') || cell.includes('drive.google'))) return cell;
     }
     return null;
 }
 
 function getDateGroup(dateStr) {
-    const now = new Date();
+    if (!dateStr) return "Sebelumnya";
+    
+    // Perbaikan parsing tanggal untuk format Google Sheets (biasanya MM/DD/YYYY atau DD/MM/YYYY)
     const d = new Date(dateStr);
     if (isNaN(d)) return "Sebelumnya";
-    const diff = (now - d) / (1000 * 60 * 60 * 24);
-    if (diff < 1) return "Hari ini";
-    if (diff < 2) return "Kemarin";
+    
+    const now = new Date();
+    const diffTime = now - d;
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays < 1 && now.getDate() === d.getDate()) return "Hari ini";
+    if (diffDays <= 1) return "Kemarin";
     return "Sebelumnya";
 }
 
@@ -50,7 +59,6 @@ function toggleExpand(el) {
     el.closest('.comment-box').classList.toggle('expanded');
 }
 
-// Fungsi Reaksi Visual
 function addReaction(btn) {
     const span = btn.querySelector('span');
     let count = parseInt(span.innerText);
@@ -60,53 +68,64 @@ function addReaction(btn) {
 }
 
 async function loadComments() {
-    const response = await fetch(`${sheetURL}&t=${Date.now()}`);
-    const text = await response.text();
-    const rows = parseCSV(text).slice(1);
+    try {
+        const response = await fetch(`${sheetURL}&t=${Date.now()}`);
+        const text = await response.text();
+        const rows = parseCSV(text).slice(1);
 
-    const groups = { "Hari ini": [], "Kemarin": [], "Sebelumnya": [] };
+        const groups = { "Hari ini": [], "Kemarin": [], "Sebelumnya": [] };
 
-    rows.forEach(row => {
-        const time = row[0];
-        const content = row[1];
-        let image = findImage(row);
-        if (!content && !image) return;
+        rows.forEach(row => {
+            if (row.length < 2) return;
+            
+            const time = row[0];
+            const content = row[1];
+            let image = findImage(row);
+            
+            if (!content && !image) return;
 
-        let imgHTML = '';
-        if (image && image.startsWith('http')) {
-            image = convertDriveLink(image);
-            imgHTML = `<img src="${image}" onerror="this.style.display='none'">`;
-        }
+            let imgHTML = '';
+            if (image && image.startsWith('http')) {
+                const imageUrl = convertDriveLink(image);
+                imgHTML = `<img src="${imageUrl}" onerror="this.style.display='none'">`;
+            }
 
-        const card = `
-            <div class="comment-box">
-                <div class="comment-text">${content || ''}</div>
-                ${imgHTML}
-                <div class="read-more" onclick="toggleExpand(this)"> lihat+ </div>
-                <div class="reaction-bar">
-                    <button class="reaction-btn" onclick="addReaction(this)">❤️ <span>0</span></button>
-                    <button class="reaction-btn" onclick="addReaction(this)">🫂 <span>0</span></button>
-                    <button class="reaction-btn" onclick="addReaction(this)">💡 <span>0</span></button>
+            const card = `
+                <div class="comment-box">
+                    <div class="comment-text">${content || ''}</div>
+                    ${imgHTML}
+                    <div class="read-more" onclick="toggleExpand(this)"> lihat+ </div>
+                    <div class="reaction-bar">
+                        <button class="reaction-btn" onclick="addReaction(this)">❤️ <span>0</span></button>
+                        <button class="reaction-btn" onclick="addReaction(this)">🫂 <span>0</span></button>
+                        <button class="reaction-btn" onclick="addReaction(this)">💡 <span>0</span></button>
+                    </div>
                 </div>
-            </div>
-        `;
-
-        const group = getDateGroup(time);
-        if(groups[group]) groups[group].push(card);
-    });
-
-    let html = '';
-    Object.keys(groups).forEach(group => {
-        if (groups[group].length > 0) {
-            html += `
-                <div class="section-title">${group}</div>
-                <div class="grid">${groups[group].join('')}</div>
             `;
-        }
-    });
 
-    document.getElementById('comments').innerHTML = html;
+            const group = getDateGroup(time);
+            if (groups[group]) groups[group].push(card);
+        });
+
+        let html = '';
+        const order = ["Hari ini", "Kemarin", "Sebelumnya"];
+        order.forEach(group => {
+            if (groups[group] && groups[group].length > 0) {
+                html += `
+                    <div class="section-title">${group}</div>
+                    <div class="grid">${groups[group].join('')}</div>
+                `;
+            }
+        });
+
+        document.getElementById('comments').innerHTML = html || '<p style="text-align:center; padding:20px;">Belum ada pengakuan saat ini.</p>';
+    } catch (error) {
+        console.error("Gagal memuat data:", error);
+    }
 }
 
+// Jalankan pertama kali
 loadComments();
-setInterval(loadComments, 30000); // Update setiap 30 detik agar tidak terlalu berat
+
+// Update setiap 30 detik
+setInterval(loadComments, 30000);
