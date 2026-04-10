@@ -23,7 +23,6 @@ body {
 h1 {
     text-align: center;
     margin-bottom: 40px;
-    color: #000;
     text-transform: uppercase;
 }
 
@@ -40,24 +39,22 @@ h1 {
     border: 2px solid #000;
     border-radius: 8px;
     padding: 12px;
-    line-height: 1.5;
-    transition: transform 0.2s ease;
-
-    height: 320px; /* 🔥 tinggi seragam */
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-}
-
-.comment-box:hover {
-    transform: translateY(-4px);
-    background: #FAFAD2;
 }
 
 /* TEXT */
 .comment-text {
-    white-space: pre-line;
     overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 4; /* 🔥 jumlah baris preview */
+    -webkit-box-orient: vertical;
+    white-space: pre-line;
+}
+
+/* EXPANDED TEXT */
+.comment-box.expanded .comment-text {
+    -webkit-line-clamp: unset;
 }
 
 /* IMAGE */
@@ -69,11 +66,26 @@ h1 {
     border-radius: 6px;
 }
 
-/* SECTION TITLE */
+/* BUTTON */
+.read-more {
+    margin-top: 8px;
+    font-size: 12px;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+/* SECTION */
 .section-title {
     margin-top: 40px;
     margin-bottom: 10px;
     font-weight: 500;
+}
+
+/* MOBILE */
+@media (max-width: 600px) {
+    .comment-box img {
+        height: auto;
+    }
 }
 </style>
 </head>
@@ -88,7 +100,6 @@ h1 {
 <script>
 const sheetURL = 'https://docs.google.com/spreadsheets/d/1jaO6kwbXqLBFzHAI9KphFX95Pxdsrgxybdg48oLhAmM/export?format=csv';
 
-// CSV parser
 function parseCSV(text) {
     const rows = [];
     let row = [], cell = '', insideQuotes = false;
@@ -117,30 +128,21 @@ function parseCSV(text) {
     return rows;
 }
 
-// convert Google Drive link
 function convertDriveLink(url) {
     const match = url.match(/\/d\/(.*?)\//);
-    if (match) {
-        return `https://lh3.googleusercontent.com/d/${match[1]}`;
-    }
-    return url;
+    return match ? `https://lh3.googleusercontent.com/d/${match[1]}` : url;
 }
 
-// find image in row
 function findImage(row) {
     for (let cell of row) {
-        if (cell && cell.includes('http')) {
-            return cell;
-        }
+        if (cell && cell.includes('http')) return cell;
     }
     return null;
 }
 
-// cluster date
 function getDateGroup(dateStr) {
     const now = new Date();
     const d = new Date(dateStr);
-
     if (isNaN(d)) return "Sebelumnya";
 
     const diff = (now - d) / (1000 * 60 * 60 * 24);
@@ -150,64 +152,62 @@ function getDateGroup(dateStr) {
     return "Sebelumnya";
 }
 
+function toggleExpand(el) {
+    el.closest('.comment-box').classList.toggle('expanded');
+}
+
 async function loadComments() {
-    try {
-        const response = await fetch(`${sheetURL}&t=${Date.now()}`);
-        const text = await response.text();
+    const response = await fetch(`${sheetURL}&t=${Date.now()}`);
+    const text = await response.text();
 
-        const rows = parseCSV(text).slice(1);
+    const rows = parseCSV(text).slice(1);
 
-        const groups = {
-            "Hari ini": [],
-            "Kemarin": [],
-            "Sebelumnya": []
-        };
+    const groups = {
+        "Hari ini": [],
+        "Kemarin": [],
+        "Sebelumnya": []
+    };
 
-        rows.forEach(row => {
-            const time = row[0];
-            const content = row[1];
+    rows.forEach(row => {
+        const time = row[0];
+        const content = row[1];
 
-            let image = findImage(row);
+        let image = findImage(row);
 
-            if (!content && !image) return;
+        if (!content && !image) return;
 
-            let imgHTML = '';
+        let imgHTML = '';
+        if (image && image.startsWith('http')) {
+            image = convertDriveLink(image);
+            imgHTML = `<img src="${image}" onerror="this.style.display='none'">`;
+        }
 
-            if (image && image.startsWith('http')) {
-                image = convertDriveLink(image);
-                imgHTML = `<img src="${image}" onerror="this.style.display='none'">`;
-            }
+        const card = `
+            <div class="comment-box">
+                <div class="comment-text">${content || ''}</div>
+                ${imgHTML}
+                <div class="read-more" onclick="toggleExpand(this)">Lihat lebih</div>
+            </div>
+        `;
 
-            const card = `
-                <div class="comment-box">
-                    <div class="comment-text">${content || ''}</div>
-                    ${imgHTML}
+        const group = getDateGroup(time);
+        groups[group].push(card);
+    });
+
+    let html = '';
+
+    Object.keys(groups).forEach(group => {
+        if (groups[group].length > 0) {
+            html += `
+                <div class="section-title">${group}</div>
+                <div class="grid">
+                    ${groups[group].join('')}
                 </div>
             `;
+        }
+    });
 
-            const group = getDateGroup(time);
-            groups[group].push(card);
-        });
-
-        let html = '';
-
-        Object.keys(groups).forEach(group => {
-            if (groups[group].length > 0) {
-                html += `
-                    <div class="section-title">${group}</div>
-                    <div class="grid">
-                        ${groups[group].join('')}
-                    </div>
-                `;
-            }
-        });
-
-        document.getElementById('comments').innerHTML = html;
-
-    } catch (error) {
-        console.error(error);
-        document.getElementById('comments').innerHTML = 'Gagal load data';
-    }
+    document.getElementById('comments').innerHTML = html;
 }
 
 loadComments();
