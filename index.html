@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TA Talk: Ask Anything</title>
+<title>HVAC</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
 
@@ -27,14 +27,14 @@ h1 {
     text-transform: uppercase;
 }
 
-/* 🔥 GRID */
+/* GRID */
 .grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
     gap: 16px;
 }
 
-/* 🔳 CARD */
+/* CARD */
 .comment-box {
     background: #FFFFE0;
     border: 2px solid #000;
@@ -49,19 +49,16 @@ h1 {
     background: #FAFAD2;
 }
 
-/* TEXT */
 .comment-text {
     white-space: pre-line;
 }
 
-/* IMAGE */
 .comment-box img {
     width: 100%;
     margin-top: 10px;
     border-radius: 6px;
 }
 
-/* SECTION TITLE */
 .section-title {
     margin-top: 40px;
     margin-bottom: 10px;
@@ -73,7 +70,7 @@ h1 {
 <body>
 
 <div class="container">
-    <h1>TA Talk: Ask Anything</h1>
+    <h1>HVAC</h1>
     <div id="comments"></div>
 </div>
 
@@ -109,16 +106,31 @@ function parseCSV(text) {
     return rows;
 }
 
-// convert link drive → image
+// convert drive link → image (lebih stabil)
 function convertDriveLink(url) {
     const match = url.match(/\/d\/(.*?)\//);
-    return match ? `https://drive.google.com/uc?export=view&id=${match[1]}` : url;
+    if (match) {
+        return `https://lh3.googleusercontent.com/d/${match[1]}`;
+    }
+    return url;
+}
+
+// cari link gambar di seluruh row
+function findImage(row) {
+    for (let cell of row) {
+        if (cell && cell.includes('http')) {
+            return cell;
+        }
+    }
+    return null;
 }
 
 // cluster waktu
 function getDateGroup(dateStr) {
     const now = new Date();
     const d = new Date(dateStr);
+
+    if (isNaN(d)) return "Sebelumnya";
 
     const diff = (now - d) / (1000 * 60 * 60 * 24);
 
@@ -143,7 +155,8 @@ async function loadComments() {
         rows.forEach(row => {
             const time = row[0];
             const content = row[1];
-            let image = row[2];
+
+            let image = findImage(row);
 
             if (!content && !image) return;
 
@@ -151,7 +164,7 @@ async function loadComments() {
 
             if (image && image.startsWith('http')) {
                 image = convertDriveLink(image);
-                imgHTML = `<img src="${image}">`;
+                imgHTML = `<img src="${image}" onerror="this.style.display='none'">`;
             }
 
             const card = `
