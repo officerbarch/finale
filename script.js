@@ -40,19 +40,19 @@ function findImage(row) {
 }
 
 function getDateGroup(dateStr) {
-    if (!dateStr) return "Sebelumnya";
+    if (!dateStr) return "Past";
     
     // Perbaikan parsing tanggal untuk format Google Sheets (biasanya MM/DD/YYYY atau DD/MM/YYYY)
     const d = new Date(dateStr);
-    if (isNaN(d)) return "Sebelumnya";
+    if (isNaN(d)) return "Past";
     
     const now = new Date();
     const diffTime = now - d;
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
-    if (diffDays < 1 && now.getDate() === d.getDate()) return "Hari ini";
-    if (diffDays <= 1) return "Kemarin";
-    return "Sebelumnya";
+    if (diffDays < 1 && now.getDate() === d.getDate()) return "Today";
+    if (diffDays <= 1) return "Yesterday";
+    return "Past";
 }
 
 function toggleExpand(el) {
@@ -73,7 +73,7 @@ async function loadComments() {
         const text = await response.text();
         const rows = parseCSV(text).slice(1);
 
-        const groups = { "Hari ini": [], "Kemarin": [], "Sebelumnya": [] };
+        const groups = { "Today": [], "Yesterday": [], "Past": [] };
 
         rows.forEach(row => {
             if (row.length < 2) return;
