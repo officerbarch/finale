@@ -108,7 +108,7 @@ async function loadComments() {
         });
 
         let html = '';
-        const order = ["Hari ini", "Kemarin", "Sebelumnya"];
+        const order = ["Today", "Yesterday", "Past"];
         order.forEach(group => {
             if (groups[group] && groups[group].length > 0) {
                 html += `
