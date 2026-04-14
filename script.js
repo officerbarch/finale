@@ -128,4 +128,4 @@ async function loadComments() {
 loadComments();
 
 // Update setiap 30 detik
-setInterval(loadComments, 80000);
+setInterval(loadComments, 100000);
