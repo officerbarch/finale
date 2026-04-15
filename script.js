@@ -94,7 +94,7 @@ async function loadComments() {
                 <div class="comment-box">
                     <div class="comment-text">${content || ''}</div>
                     ${imgHTML}
-                    <div class="read-more" onclick="toggleExpand(this)"> lihat+ </div>
+                    <div class="read-more" onclick="toggleExpand(this)"> Lihat+ </div>
                     <div class="reaction-bar">
                         <button class="reaction-btn" onclick="addReaction(this)">❤️ <span>0</span></button>
                         <button class="reaction-btn" onclick="addReaction(this)">🫂 <span>0</span></button>
