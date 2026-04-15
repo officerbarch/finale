@@ -1,6 +1,6 @@
-// 1. KONFIGURASI (Ganti URL di bawah dengan milik Anda)
+// 1. KONFIGURASI
 const sheetURL = 'https://docs.google.com/spreadsheets/d/1jaO6kwbXqLBFzHAI9KphFX95Pxdsrgxybdg48oLhAmM/export?format=csv';
-const webAppURL = 'https://script.google.com/macros/s/AKfycbxODONMqj_nKapS5Qgda0aeYpHKjqJMvOWhU67NnUscE7MdfiswlkNGVLgkVu8jVoP1/exec';
+const webAppURL = 'ISI_DENGAN_URL_DEPLOYMENT_APPS_SCRIPT_ANDA'; // Masukkan URL dari Deploy Apps Script
 
 // 2. FUNGSI PARSING CSV
 function parseCSV(text) {
@@ -27,30 +27,18 @@ function parseCSV(text) {
     return rows;
 }
 
-// 3. FUNGSI KONVERSI LINK DRIVE (Versi Diperkuat)
+// 3. FUNGSI KONVERSI LINK DRIVE (Agar Gambar Muncul)
 function convertDriveLink(url) {
+    if (!url) return '';
     let fileId = '';
-    
-    // Coba ekstrak ID menggunakan pola /d/ID/
     const matchD = url.match(/\/d\/(.*?)\//);
-    if (matchD && matchD[1]) {
-        fileId = matchD[1];
-    } 
-    // Jika gagal, coba ekstrak ID menggunakan pola ?id=ID
-    else {
-        const matchId = url.match(/[?&]id=([^&]+)/);
-        if (matchId && matchId[1]) {
-            fileId = matchId[1];
-        }
-    }
+    const matchId = url.match(/[?&]id=([^&]+)/);
+    if (matchD) fileId = matchD[1];
+    else if (matchId) fileId = matchId[1];
 
-    // Jika ID ditemukan, ubah menjadi link thumbnail Google
     if (fileId) {
-        // https://lh3.googleusercontent.com/u/0/d/${fileId} <- Gunakan ini jika ingin cepat
-        return `https://lh3.googleusercontent.com/u/0/d/${fileId}=s500`; // 's500' menentukan ukuran thumbnail
+        return `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`;
     }
-    
-    // Jika bukan link Drive atau ID tidak ditemukan, kembalikan URL asli
     return url;
 }
 
@@ -75,7 +63,7 @@ function getDateGroup(dateStr) {
     return "Past";
 }
 
-// 6. FUNGSI INTERAKSI (Buka Gambar & Reaksi)
+// 6. FUNGSI INTERAKSI (Modal & Reaksi)
 function openImage(src) {
     const modal = document.getElementById('imageModal');
     const fullImg = document.getElementById('fullImage');
@@ -94,14 +82,12 @@ function addReaction(btn, rowIndex, type) {
     let count = parseInt(span.innerText);
     span.innerText = count + 1;
 
-    // Efek Visual
     btn.style.transform = "scale(1.2)";
     setTimeout(() => btn.style.transform = "scale(1)", 100);
 
-    // Kirim ke Google Sheets (Row index + 2 karena CSV mulai dari nol dan ada header)
     const actualRow = rowIndex + 2;
     fetch(`${webAppURL}?action=addReaction&row=${actualRow}&type=${type}`)
-        .catch(err => console.error("Gagal mengirim reaksi:", err));
+        .catch(err => console.error("Gagal kirim reaksi:", err));
 }
 
 // 7. FUNGSI UTAMA LOAD DATA
@@ -109,15 +95,12 @@ async function loadComments() {
     try {
         const response = await fetch(`${sheetURL}&t=${Date.now()}`);
         const text = await response.text();
-        // slice(1) untuk buang header, reverse() agar yang terbaru di atas
         const rows = parseCSV(text).slice(1).reverse();
-
         const groups = { "Today": [], "Yesterday": [], "Past": [] };
 
         rows.forEach((row, index) => {
             if (row.length < 2) return;
             
-            // Penentuan urutan kolom: A=Time, B=Content, C=Image, D=Like, E=Hug, F=Idea
             const time = row[0];
             const content = row[1];
             const image = findImage(row);
@@ -125,17 +108,12 @@ async function loadComments() {
             const countHug = row[4] || 0;
             const countIdea = row[5] || 0;
             
-            if (!content && !image) return;
-
             let imgHTML = '';
             if (image && image.startsWith('http')) {
                 const imageUrl = convertDriveLink(image);
-                // Ditambahkan fungsi klik untuk memperbesar gambar
                 imgHTML = `<img src="${imageUrl}" onclick="openImage('${imageUrl}')" style="cursor:zoom-in" onerror="this.style.display='none'">`;
             }
 
-            // Note: index di sini perlu disesuaikan karena kita menggunakan .reverse()
-            // Baris asli di Sheet = (TotalRows - current index) + 1
             const originalIndex = rows.length - 1 - index;
 
             const card = `
@@ -166,12 +144,11 @@ async function loadComments() {
             }
         });
 
-        document.getElementById('comments').innerHTML = html || '<p style="text-align:center; padding:20px;">Belum ada pengakuan saat ini.</p>';
+        document.getElementById('comments').innerHTML = html || '<p style="text-align:center; padding:20px;">Belum ada pengakuan.</p>';
     } catch (error) {
         console.error("Gagal memuat data:", error);
     }
 }
 
-// Jalankan Load Data
 loadComments();
 setInterval(loadComments, 100000);
