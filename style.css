@@ -72,6 +72,7 @@ h1 {
     line-height: 1.6;
     margin-bottom: 15px;
     white-space: pre-wrap; /* Agar enter dari form terbaca */
+    color: #000000;
     overflow: hidden;
     max-height: 100px; /* Batasan awal teks */
     transition: max-height 0.3s ease;
