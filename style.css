@@ -15,7 +15,7 @@ body {
 }
 
 h1 {
-    text-align: center;
+    text-align: left;
     font-weight: 700;
     margin-bottom: 10px;
     letter-spacing: -0.5px;
@@ -43,7 +43,7 @@ h1 {
     font-weight: 700;
     margin: 30px 0 10px;
     padding-bottom: 5px;
-    border-bottom: 0px solid #ddd;
+    border-bottom: none solid #ddd;
     color: #000000;
 }
 
@@ -99,7 +99,7 @@ h1 {
 
 /* --- Tombol Lihat+ --- */
 .read-more {
-    font-size: 12px;
+    font-size: 14px;
     color: #000000;
     cursor: pointer;
     font-weight: 500;
