@@ -1,6 +1,6 @@
 // 1. KONFIGURASI
 const sheetURL = 'https://docs.google.com/spreadsheets/d/1jaO6kwbXqLBFzHAI9KphFX95Pxdsrgxybdg48oLhAmM/export?format=csv';
-const webAppURL = 'ISI_DENGAN_URL_DEPLOYMENT_APPS_SCRIPT_ANDA'; // Masukkan URL dari Deploy Apps Script
+const webAppURL = 'https://script.google.com/macros/s/AKfycbxODONMqj_nKapS5Qgda0aeYpHKjqJMvOWhU67NnUscE7MdfiswlkNGVLgkVu8jVoP1/exec'; // Masukkan URL dari Deploy Apps Script
 
 // 2. FUNGSI PARSING CSV
 function parseCSV(text) {
