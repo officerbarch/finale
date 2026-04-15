@@ -27,10 +27,31 @@ function parseCSV(text) {
     return rows;
 }
 
-// 3. FUNGSI KONVERSI LINK DRIVE (Perbaikan Sintaks $)
+// 3. FUNGSI KONVERSI LINK DRIVE (Versi Diperkuat)
 function convertDriveLink(url) {
-    const match = url.match(/\/d\/(.*?)\//);
-    return match ? `https://drive.google.com/uc?export=view&id=${match[1]}` : url;
+    let fileId = '';
+    
+    // Coba ekstrak ID menggunakan pola /d/ID/
+    const matchD = url.match(/\/d\/(.*?)\//);
+    if (matchD && matchD[1]) {
+        fileId = matchD[1];
+    } 
+    // Jika gagal, coba ekstrak ID menggunakan pola ?id=ID
+    else {
+        const matchId = url.match(/[?&]id=([^&]+)/);
+        if (matchId && matchId[1]) {
+            fileId = matchId[1];
+        }
+    }
+
+    // Jika ID ditemukan, ubah menjadi link thumbnail Google
+    if (fileId) {
+        // https://lh3.googleusercontent.com/u/0/d/${fileId} <- Gunakan ini jika ingin cepat
+        return `https://lh3.googleusercontent.com/u/0/d/${fileId}=s500`; // 's500' menentukan ukuran thumbnail
+    }
+    
+    // Jika bukan link Drive atau ID tidak ditemukan, kembalikan URL asli
+    return url;
 }
 
 // 4. FUNGSI MENCARI GAMBAR DALAM ROW
