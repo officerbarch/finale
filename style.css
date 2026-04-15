@@ -47,16 +47,19 @@ h1 {
     color: #555;
 }
 
-/* --- Kartu Komentar (Comment Box) --- */
+/* --- Cari bagian ini di style.css --- */
 .comment-box {
-    background: #FFFFE0;
+    background: #ffffff;
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     display: flex;
     flex-direction: column;
     position: relative;
-    border: 1px solid #f0f0f0;
+    
+    /* UBAH BAGIAN INI */
+    border: 2px solid #333; /* '2px' adalah ketebalan, '#333' adalah warna garis */
+    
     transition: transform 0.2s ease;
 }
 
@@ -65,7 +68,7 @@ h1 {
 }
 
 .comment-text {
-    font-size: 14px;
+    font-size: 16px;
     line-height: 1.6;
     margin-bottom: 15px;
     white-space: pre-wrap; /* Agar enter dari form terbaca */
