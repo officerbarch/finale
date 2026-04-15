@@ -58,7 +58,7 @@ h1 {
     position: relative;
     
     /* UBAH BAGIAN INI */
-    border: 2px solid #333; /* '2px' adalah ketebalan, '#333' adalah warna garis */
+    border: 2px solid #101201; /* '2px' adalah ketebalan, '#333' adalah warna garis */
     
     transition: transform 0.2s ease;
 }
