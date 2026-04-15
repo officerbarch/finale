@@ -49,7 +49,7 @@ h1 {
 
 /* --- Cari bagian ini di style.css --- */
 .comment-box {
-    background: #ffffff;
+    background: #FFFFE0;
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0 0px 0px rgba(0,0,0,0.05);
@@ -58,7 +58,7 @@ h1 {
     position: relative;
     
     /* UBAH BAGIAN INI */
-    border: 2px solid #000000; /* '2px' adalah ketebalan, '#333' adalah warna garis */
+    border: 1px solid #000000; /* '2px' adalah ketebalan, '#333' adalah warna garis */
     
     transition: transform 0.2s ease;
 }
