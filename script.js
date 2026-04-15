@@ -1,8 +1,8 @@
 // 1. KONFIGURASI
 const sheetURL = 'https://docs.google.com/spreadsheets/d/1jaO6kwbXqLBFzHAI9KphFX95Pxdsrgxybdg48oLhAmM/export?format=csv';
-const webAppURL = 'https://script.google.com/macros/s/AKfycbxODONMqj_nKapS5Qgda0aeYpHKjqJMvOWhU67NnUscE7MdfiswlkNGVLgkVu8jVoP1/exec'; // Masukkan URL dari Deploy Apps Script
+const webAppURL = 'https://script.google.com/macros/s/AKfycbxODONMqj_nKapS5Qgda0aeYpHKjqJMvOWhU67NnUscE7MdfiswlkNGVLgkVu8jVoP1/exec'; 
 
-// 2. FUNGSI PARSING CSV
+// 2. FUNGSI PARSING CSV (Mengubah teks mentah menjadi array)
 function parseCSV(text) {
     const rows = [];
     let row = [], cell = '', insideQuotes = false;
@@ -27,9 +27,9 @@ function parseCSV(text) {
     return rows;
 }
 
-// 3. FUNGSI KONVERSI LINK DRIVE (Agar Gambar Muncul)
+// 3. FUNGSI KONVERSI LINK DRIVE (Penting agar gambar Kolom C muncul)
 function convertDriveLink(url) {
-    if (!url) return '';
+    if (!url || !url.includes('drive.google.com')) return url;
     let fileId = '';
     const matchD = url.match(/\/d\/(.*?)\//);
     const matchId = url.match(/[?&]id=([^&]+)/);
@@ -37,20 +37,13 @@ function convertDriveLink(url) {
     else if (matchId) fileId = matchId[1];
 
     if (fileId) {
+        // Menggunakan endpoint thumbnail Google (sz=w1000 untuk kualitas tinggi)
         return `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`;
     }
     return url;
 }
 
-// 4. FUNGSI MENCARI GAMBAR DALAM ROW
-function findImage(row) {
-    for (let cell of row) {
-        if (cell && (cell.includes('http') || cell.includes('drive.google'))) return cell;
-    }
-    return null;
-}
-
-// 5. FUNGSI PENGELOMPOKAN TANGGAL
+// 4. FUNGSI PENGELOMPOKAN TANGGAL
 function getDateGroup(dateStr) {
     if (!dateStr) return "Past";
     const d = new Date(dateStr);
@@ -63,7 +56,7 @@ function getDateGroup(dateStr) {
     return "Past";
 }
 
-// 6. FUNGSI INTERAKSI (Modal & Reaksi)
+// 5. FUNGSI INTERAKSI (Modal & Reaksi)
 function openImage(src) {
     const modal = document.getElementById('imageModal');
     const fullImg = document.getElementById('fullImage');
@@ -85,35 +78,41 @@ function addReaction(btn, rowIndex, type) {
     btn.style.transform = "scale(1.2)";
     setTimeout(() => btn.style.transform = "scale(1)", 100);
 
+    // Kirim data ke Google Apps Script
     const actualRow = rowIndex + 2;
-    fetch(`${webAppURL}?action=addReaction&row=${actualRow}&type=${type}`)
-        .catch(err => console.error("Gagal kirim reaksi:", err));
+    if (webAppURL !== 'ISI_DENGAN_URL_DEPLOYMENT_APPS_SCRIPT_ANDA') {
+        fetch(`${webAppURL}?action=addReaction&row=${actualRow}&type=${type}`)
+            .catch(err => console.error("Gagal kirim reaksi:", err));
+    }
 }
 
-// 7. FUNGSI UTAMA LOAD DATA
+// 6. FUNGSI UTAMA LOAD DATA
 async function loadComments() {
     try {
         const response = await fetch(`${sheetURL}&t=${Date.now()}`);
         const text = await response.text();
+        // slice(1) buang header, reverse() agar yang terbaru di atas
         const rows = parseCSV(text).slice(1).reverse();
         const groups = { "Today": [], "Yesterday": [], "Past": [] };
 
         rows.forEach((row, index) => {
             if (row.length < 2) return;
             
-            const time = row[0];
-            const content = row[1];
-            const image = findImage(row);
-            const countLike = row[3] || 0;
-            const countHug = row[4] || 0;
-            const countIdea = row[5] || 0;
+            // --- PEMETAAN KOLOM (Sesuaikan jika urutan di Sheets berubah) ---
+            const time = row[0];        // Kolom A
+            const content = row[1];     // Kolom B
+            const imageLink = row[2];   // Kolom C (Gambar Anda)
+            const countLike = row[3] || 0; // Kolom D
+            const countHug = row[4] || 0;  // Kolom E
+            const countIdea = row[5] || 0; // Kolom F
             
             let imgHTML = '';
-            if (image && image.startsWith('http')) {
-                const imageUrl = convertDriveLink(image);
+            if (imageLink && imageLink.includes('http')) {
+                const imageUrl = convertDriveLink(imageLink);
                 imgHTML = `<img src="${imageUrl}" onclick="openImage('${imageUrl}')" style="cursor:zoom-in" onerror="this.style.display='none'">`;
             }
 
+            // Menghitung baris asli di Sheets karena urutan dibalik (reverse)
             const originalIndex = rows.length - 1 - index;
 
             const card = `
@@ -144,11 +143,12 @@ async function loadComments() {
             }
         });
 
-        document.getElementById('comments').innerHTML = html || '<p style="text-align:center; padding:20px;">Belum ada pengakuan.</p>';
+        document.getElementById('comments').innerHTML = html || '<p style="text-align:center; padding:20px;">Belum ada data.</p>';
     } catch (error) {
         console.error("Gagal memuat data:", error);
     }
 }
 
+// Jalankan fungsi
 loadComments();
 setInterval(loadComments, 100000);
