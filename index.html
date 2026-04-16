@@ -4,129 +4,46 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HVAC - Healing Via Anonymous Confession</title>
-
-    <!-- Font -->
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
-
-    <!-- CSS -->
-    <style>
-        body {
-            font-family: 'Roboto', sans-serif;
-            margin: 0;
-            background: #ffffff;
-        }
-
-        .container {
-            padding: 20px;
-        }
-
-        .header-section {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-
-        h1 {
-            font-size: 28px;
-            font-weight: 700;
-            margin-bottom: 10px;
-            text-decoration: underline;
-        }
-
-        h2 {
-            font-size: 18px;
-            font-style: italic;
-            font-weight: 700;
-            animation: pulse 2s infinite;
-        }
-
-        /* ANIMASI */
-        @keyframes pulse {
-            0% { opacity: 0.8; }
-            50% { opacity: 1; }
-            100% { opacity: 0.8; }
-        }
-
-        .description-text {
-            max-width: 800px;
-            margin: 0 auto;
-            text-align: justify;
-            line-height: 1.8;
-            color: #333;
-            font-size: 15px;
-        }
-
-        .form-section {
-            max-width: 800px;
-            margin: 0 auto 50px auto;
-            border-radius: 12px;
-            overflow: hidden;
-            border: 1px solid #000;
-        }
-
-        iframe {
-            width: 100%;
-            height: 380px;
-            border: none;
-            display: block;
-        }
-
-        .footer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background: #ffffff;
-            text-align: left;
-            padding: 10px;
-            font-size: 10px;
-            border-top: 1px solid #ddd;
-            z-index: 1000;
-        }
-
-        #imageModal {
-            display: none;
-            position: fixed;
-            z-index: 9999;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.9);
-            cursor: pointer;
-            align-items: center;
-            justify-content: center;
-        }
-
-        #fullImage {
-            max-width: 90%;
-            max-height: 90%;
-            border: 2px solid white;
-            border-radius: 8px;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
 <div class="container">
-    <div class="header-section">
-        
-        <h1>H.V.A.C - Healing Via Anonymous Confession</h1>
+    <div class="header-section" style="text-align: center; margin-bottom: 40px;">
+        <h1 style="font-size: 28px; font-weight: 700; margin-bottom: 10px; display: block; width: 100%; text-decoration: underline;">
+            H.V.A.C - Healing Via Anonymous Confession
+        </h1>
+<h2 style="
+    font-size: 18px;
+    font-style: italic;
+    font-weight: 700;
+    animation: pulse 2s infinite;
+">
+    "Modern Problems Require Postmodern Solutions"
+</h2>
 
-        <h2>"Modern Problems Require Postmodern Solutions"</h2>
+<style>
+@keyframes pulse {
+    0% { opacity: 0.8; }
+    50% { opacity: 1; }
+    100% { opacity: 0.8; }
+}
+</style>
 
-        <div class="description-text">
-            <strong>
-                Platform terbuka untuk semua! Seluruh materi terkurasi oleh moderator untuk menghindari prasangka. 
-                Gunakan "#" untuk memberi balasan, atau tulis apa pun. 
-                <i>Ada banyak bunga di TAman!</i>
-            </strong>
+        <div class="description-text" style="max-width: 800px; margin: 0 auto; text-align: justify; text-justify: inter-word; line-height: 1.8; color: #333; font-size: 15px;">
+<strong>Platform terbuka untuk semua! Seluruh materi terkurasi oleh moderator untuk menghindari prasangka. Gunakan "#" untuk memberi balasan, atau tulis apa pun. <i>Ada banyak bunga di TAman!</i></strong>
         </div>
-
     </div>
 
-    <div class="form-section">
-        <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSfTb55aL155l2MPzrqkoiiuCP2KoQIGTImsql_E4JQ_OkApWQ/viewform?embedded=true">
+    <div class="form-section" style="max-width: 800px; margin: 0 auto 50px auto; border-radius: 12px; overflow: hidden; border: 1px solid #000; line-height: 0;">
+        <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSfTb55aL155l2MPzrqkoiiuCP2KoQIGTImsql_E4JQ_OkApWQ/viewform?embedded=true" 
+                width="100%" 
+                height="380" 
+                frameborder="0" 
+                marginheight="0" 
+                marginwidth="0"
+                style="border: none; display: block;">
             Memuat…
         </iframe>
     </div>
@@ -136,13 +53,11 @@
     <div id="comments"></div>
 </div>
 
-<!-- MODAL IMAGE -->
-<div id="imageModal" onclick="this.style.display='none'">
-    <img id="fullImage">
+<div id="imageModal" style="display:none; position:fixed; z-index:9999; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); cursor:pointer; align-items:center; justify-content:center;" onclick="this.style.display='none'">
+    <img id="fullImage" style="max-width:90%; max-height:90%; border:2px solid white; border-radius:8px;">
 </div>
 
-<!-- FOOTER -->
-<div class="footer">
+<div style="position: fixed; bottom: 0; left: 0; width: 100%; background: #ffffff; text-align: left; padding: 10px; font-size: 10px; border-top: 1px solid #ddd; z-index: 1000;">
     Koordinator TA | Arsitektur F-TSPK ITS | 2026
 </div>
 
