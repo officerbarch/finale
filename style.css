@@ -6,7 +6,35 @@ body {
 
 .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
 
-h1 { text-align: center; font-weight: 700; letter-spacing: -0.5px; }
+h1 {
+    text-align: center;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    margin-bottom: 10px;
+    display: block;    /* Memastikan elemen mengambil ruang penuh */
+    width: 100%;       /* Memastikan teks bisa berada di tengah lebar layar */
+}
+
+h2 {
+    text-align: center;
+    font-size: 18px;
+    font-style: italic;
+    font-weight: normal;
+    opacity: 0.9;
+    margin-bottom: 30px;
+    display: block;
+    width: 100%;
+}
+
+/* Tambahkan ini untuk deskripsi Anda */
+.description-text {
+    max-width: 800px;
+    margin: 0 auto 40px auto; /* Center kotaknya, bukan teksnya */
+    text-align: justify;      /* Teks di dalamnya rata kiri-kanan */
+    text-justify: inter-word;
+    line-height: 1.6;
+    color: #333;
+}
 
 .form-section {
     background: #fff; border-radius: 12px; overflow: hidden;
