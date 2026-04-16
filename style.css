@@ -5,10 +5,15 @@ body {
     color: #000000;
     padding-bottom: 60px;
 
-    /* --- POLA DOT GRID --- */
-    background-color: #ffffff; /* Warna dasar */
-    background-image: radial-gradient(#dede4e 1px, transparent 1px); /* Warna titik & ukuran 1px */
-    background-size: 30px 30px; /* Jarak antar titik (grid 20px) */
+    /* --- POLA plus GRID --- */
+background-color: #ffffff;
+
+background-image: 
+    linear-gradient(#dede4e 2px, transparent 2px),
+    linear-gradient(90deg, #dede4e 2px, transparent 2px);
+
+background-size: 30px 30px;
+background-position: center;
 }
 
 .container {
