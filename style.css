@@ -7,8 +7,8 @@ body {
 
     /* --- POLA DOT GRID --- */
     background-color: #ffffff; /* Warna dasar */
-    background-image: radial-gradient(#949451 2px, transparent 1px); /* Warna titik & ukuran 1px */
-    background-size: 20px 20px; /* Jarak antar titik (grid 20px) */
+    background-image: radial-gradient(#1f1f02 1px, transparent 1px); /* Warna titik & ukuran 1px */
+    background-size: 10px 10px; /* Jarak antar titik (grid 20px) */
 }
 
 .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
