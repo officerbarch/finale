@@ -34,11 +34,7 @@ function convertDriveLink(url) {
     const matchId = url.match(/[?&]id=([^&]+)/);
     if (matchD) fileId = matchD[1];
     else if (matchId) fileId = matchId[1];
-
-    if (fileId) {
-        return `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`;
-    }
-    return url;
+    return fileId ? `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000` : url;
 }
 
 function getDateGroup(dateStr) {
@@ -53,7 +49,7 @@ function getDateGroup(dateStr) {
     return "Past";
 }
 
-// 3. FUNGSI INTERAKSI
+// 3. FUNGSI INTERAKSI & FILTER
 function openImage(src) {
     const modal = document.getElementById('imageModal');
     const fullImg = document.getElementById('fullImage');
@@ -67,17 +63,34 @@ function addReaction(btn, rowIndex, type) {
     const span = btn.querySelector('span');
     let count = parseInt(span.innerText);
     span.innerText = count + 1;
-
     btn.style.transform = "scale(1.2)";
     setTimeout(() => btn.style.transform = "scale(1)", 100);
-
     const actualRow = rowIndex + 2; 
-    fetch(`${webAppURL}?action=addReaction&row=${actualRow}&type=${type}`)
-        .catch(err => console.error("Gagal kirim reaksi:", err));
+    fetch(`${webAppURL}?action=addReaction&row=${actualRow}&type=${type}`).catch(err => console.error(err));
 }
 
 function toggleExpand(el) {
     el.closest('.comment-box').classList.toggle('expanded');
+}
+
+// FUNGSI UNTUK KLIK TAGAR (FILTER)
+function filterByTag(selectedTag) {
+    const allCards = document.querySelectorAll('.comment-box');
+    allCards.forEach(card => {
+        const cardTags = card.querySelectorAll('.tag');
+        let hasTag = false;
+        cardTags.forEach(t => { if (t.innerText === selectedTag) hasTag = true; });
+        card.style.display = hasTag ? 'flex' : 'none';
+    });
+
+    if (!document.getElementById('reset-filter')) {
+        const resetBtn = document.createElement('button');
+        resetBtn.id = 'reset-filter';
+        resetBtn.innerHTML = `Tampilkan Semua (✕) | Filter: ${selectedTag}`;
+        resetBtn.className = 'reset-btn';
+        resetBtn.onclick = () => location.reload();
+        document.querySelector('.container').insertBefore(resetBtn, document.getElementById('comments'));
+    }
 }
 
 // 4. LOAD DATA UTAMA
@@ -90,69 +103,44 @@ async function loadComments() {
 
         rows.forEach((row, index) => {
             if (row.length < 2) return;
+            const time = row[0], originalContent = row[1] || '', imageLink = row[2];
+            const cL = row[3] || 0, cH = row[4] || 0, cI = row[5] || 0;
             
-            const time = row[0];
-            const originalContent = row[1] || '';
-            const imageLink = row[2]; 
-            const countLike = row[3] || 0;
-            const countHug = row[4] || 0;
-            const countIdea = row[5] || 0;
-            
-            // --- LOGIKA SISTEM TAG ---
-            // Mencari kata yang diawali dengan #
+            // Logika Tagar
             const tagMatches = originalContent.match(/#\w+/g);
-            let tagsHTML = '';
-            let contentClean = originalContent;
-
+            let tagsHTML = '', contentClean = originalContent;
             if (tagMatches) {
-                tagsHTML = `<div class="tag-container" style="margin-bottom: 10px;">` + 
-                    tagMatches.map(tag => `<span class="tag">${tag}</span>`).join('') + 
+                tagsHTML = `<div class="tag-container">` + 
+                    tagMatches.map(tag => `<span class="tag" onclick="filterByTag('${tag}')">${tag}</span>`).join('') + 
                     `</div>`;
-                // Menghapus tag dari teks utama agar tidak berulang
                 contentClean = originalContent.replace(/#\w+/g, '').trim();
             }
             
-            let imgHTML = '';
-            if (imageLink && imageLink.includes('http')) {
-                const imageUrl = convertDriveLink(imageLink);
-                imgHTML = `<img src="${imageUrl}" onclick="openImage('${imageUrl}')" style="cursor:zoom-in" onerror="this.style.display='none'">`;
-            }
-
+            let imgHTML = imageLink && imageLink.includes('http') ? `<img src="${convertDriveLink(imageLink)}" onclick="openImage(this.src)" style="cursor:zoom-in">` : '';
             const originalIndex = rows.length - 1 - index;
 
             const card = `
                 <div class="comment-box">
                     ${tagsHTML}
-                    <div class="comment-text">${contentClean || ''}</div>
+                    <div class="comment-text">${contentClean}</div>
                     ${imgHTML}
-                    <div class="read-more" onclick="toggleExpand(this)"> Lihat+ </div>
+                    <div class="read-more" onclick="toggleExpand(this)">Lihat+</div>
                     <div class="reaction-bar">
-                        <button class="reaction-btn" onclick="addReaction(this, ${originalIndex}, 'like')">❤️ <span>${countLike}</span></button>
-                        <button class="reaction-btn" onclick="addReaction(this, ${originalIndex}, 'hug')">🫂 <span>${countHug}</span></button>
-                        <button class="reaction-btn" onclick="addReaction(this, ${originalIndex}, 'idea')">💡 <span>${countIdea}</span></button>
+                        <button class="reaction-btn" onclick="addReaction(this, ${originalIndex}, 'like')">❤️ <span>${cL}</span></button>
+                        <button class="reaction-btn" onclick="addReaction(this, ${originalIndex}, 'hug')">🫂 <span>${cH}</span></button>
+                        <button class="reaction-btn" onclick="addReaction(this, ${originalIndex}, 'idea')">💡 <span>${cI}</span></button>
                     </div>
-                </div>
-            `;
-
+                </div>`;
             const group = getDateGroup(time);
             if (groups[group]) groups[group].push(card);
         });
 
         let html = '';
-        const order = ["Today", "Yesterday", "Past"];
-        order.forEach(group => {
-            if (groups[group] && groups[group].length > 0) {
-                html += `
-                    <div class="section-title">${group}</div>
-                    <div class="grid">${groups[group].join('')}</div>
-                `;
-            }
+        ["Today", "Yesterday", "Past"].forEach(g => {
+            if (groups[g].length > 0) html += `<div class="section-title">${g}</div><div class="grid">${groups[g].join('')}</div>`;
         });
-
-        document.getElementById('comments').innerHTML = html || '<p style="text-align:center; padding:20px;">Belum ada pengakuan.</p>';
-    } catch (error) {
-        console.error("Gagal memuat data:", error);
-    }
+        document.getElementById('comments').innerHTML = html || '<p>Belum ada pengakuan.</p>';
+    } catch (e) { console.error(e); }
 }
 
 loadComments();
