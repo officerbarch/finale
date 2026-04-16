@@ -77,8 +77,8 @@ h2 {
 /* Styling Tagar */
 .tag-container { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 12px; }
 .tag {
-    background: #000; color: #fff; padding: 2px 8px; font-size: 11px;
-    font-weight: 700; border-radius: 4px; text-transform: uppercase;
+    background: #fff; color: #000; padding: 2px 8px; font-size: 11px;
+    font-weight: 700; border-radius: 4px; text-transform: lowercase;
     cursor: pointer; transition: 0.2s;
 }
 .tag:hover { background: #555; transform: scale(1.1); }
