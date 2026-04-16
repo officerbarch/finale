@@ -7,7 +7,7 @@ body {
 
     /* --- POLA DOT GRID --- */
     background-color: #ffffff; /* Warna dasar */
-    background-image: radial-gradient(#1f1f02 1px, transparent 1px); /* Warna titik & ukuran 1px */
+    background-image: radial-gradient(#dede4e 1px, transparent 1px); /* Warna titik & ukuran 1px */
     background-size: 10px 10px; /* Jarak antar titik (grid 20px) */
 }
 
