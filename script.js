@@ -91,13 +91,26 @@ async function loadComments() {
         rows.forEach((row, index) => {
             if (row.length < 2) return;
             
-            // Kolom: A(0)=Time, B(1)=Content, C(2)=Image, D(3)=Like, E(4)=Hug, F(5)=Idea
             const time = row[0];
-            const content = row[1];
+            const originalContent = row[1] || '';
             const imageLink = row[2]; 
             const countLike = row[3] || 0;
             const countHug = row[4] || 0;
             const countIdea = row[5] || 0;
+            
+            // --- LOGIKA SISTEM TAG ---
+            // Mencari kata yang diawali dengan #
+            const tagMatches = originalContent.match(/#\w+/g);
+            let tagsHTML = '';
+            let contentClean = originalContent;
+
+            if (tagMatches) {
+                tagsHTML = `<div class="tag-container" style="margin-bottom: 10px;">` + 
+                    tagMatches.map(tag => `<span class="tag">${tag}</span>`).join('') + 
+                    `</div>`;
+                // Menghapus tag dari teks utama agar tidak berulang
+                contentClean = originalContent.replace(/#\w+/g, '').trim();
+            }
             
             let imgHTML = '';
             if (imageLink && imageLink.includes('http')) {
@@ -109,7 +122,8 @@ async function loadComments() {
 
             const card = `
                 <div class="comment-box">
-                    <div class="comment-text">${content || ''}</div>
+                    ${tagsHTML}
+                    <div class="comment-text">${contentClean || ''}</div>
                     ${imgHTML}
                     <div class="read-more" onclick="toggleExpand(this)"> Lihat+ </div>
                     <div class="reaction-bar">
