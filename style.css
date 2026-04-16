@@ -65,6 +65,11 @@ h1 {
 
 .comment-box:hover {
     transform: translateY(-3px);
+    /* TAMBAHKAN/UBAH WARNA DI SINI */
+    background-color: #f5f5ba;   /* Contoh: abu-abu muda saat kursor di atasnya */
+    
+    /* OPSIONAL: Jika ingin garis pinggir juga berubah warna saat hover */
+    border-color: #000000;
 }
 
 .comment-text {
