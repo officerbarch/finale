@@ -134,7 +134,7 @@ function renderComments(dataArray, isFiltering = false, tagLabel = "") {
                 <div class="reaction-bar">
                     <button class="reaction-btn" onclick="addReaction(this, ${item.originalRow}, 'like')">❤️ <span>${item.like}</span></button>
                     <button class="reaction-btn" onclick="addReaction(this, ${item.originalRow}, 'hug')">🫂 <span>${item.hug}</span></button>
-                    <button class="reaction-btn" onclick="addReaction(this, ${item.originalRow}, 'idea')">💡 <span>${item.idea}</span></button>
+                    <button class="reaction-btn" onclick="addReaction(this, ${item.originalRow}, 'melting')">🫠 <span>${item.idea}</span></button>
                 </div>
             </div>`;
 
