@@ -1,7 +1,14 @@
 body {
     font-family: 'Roboto', sans-serif;
-    background-color: #FFFFFF;
-    margin: 0; padding: 0; color: #000; padding-bottom: 60px;
+    margin: 0;
+    padding: 0;
+    color: #000000;
+    padding-bottom: 60px;
+
+    /* --- POLA DOT GRID --- */
+    background-color: #ffffff; /* Warna dasar */
+    background-image: radial-gradient(#FFFFE0 1px, transparent 1px); /* Warna titik & ukuran 1px */
+    background-size: 20px 20px; /* Jarak antar titik (grid 20px) */
 }
 
 .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
