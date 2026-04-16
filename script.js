@@ -1,8 +1,13 @@
+// ==========================================
 // 1. KONFIGURASI
+// ==========================================
 const sheetURL = 'https://docs.google.com/spreadsheets/d/1jaO6kwbXqLBFzHAI9KphFX95Pxdsrgxybdg48oLhAmM/export?format=csv';
 const webAppURL = 'https://script.google.com/macros/s/AKfycbxODONMqj_nKapS5Qgda0aeYpHKjqJMvOWhU67NnUscE7MdfiswlkNGVLgkVu8jVoP1/exec'; 
 
-// 2. FUNGSI PEMBANTU
+// ==========================================
+// 2. FUNGSI PEMBANTU (Helpers)
+// ==========================================
+
 function parseCSV(text) {
     const rows = [];
     let row = [], cell = '', insideQuotes = false;
@@ -49,7 +54,10 @@ function getDateGroup(dateStr) {
     return "Past";
 }
 
-// 3. FUNGSI INTERAKSI & FILTER
+// ==========================================
+// 3. SISTEM FILTER & INTERAKSI
+// ==========================================
+
 function openImage(src) {
     const modal = document.getElementById('imageModal');
     const fullImg = document.getElementById('fullImage');
@@ -73,27 +81,44 @@ function toggleExpand(el) {
     el.closest('.comment-box').classList.toggle('expanded');
 }
 
-// FUNGSI UNTUK KLIK TAGAR (FILTER)
+// FUNGSI FILTER TAGAR (DIPERBARUI DENGAN TRIM)
 function filterByTag(selectedTag) {
     const allCards = document.querySelectorAll('.comment-box');
+    const cleanSelectedTag = selectedTag.trim();
+
     allCards.forEach(card => {
         const cardTags = card.querySelectorAll('.tag');
         let hasTag = false;
-        cardTags.forEach(t => { if (t.innerText === selectedTag) hasTag = true; });
-        card.style.display = hasTag ? 'flex' : 'none';
+        cardTags.forEach(t => { 
+            if (t.innerText.trim() === cleanSelectedTag) hasTag = true; 
+        });
+        
+        // Mengatur tampilan kartu
+        if (hasTag) {
+            card.style.display = 'flex';
+        } else {
+            card.style.display = 'none';
+        }
     });
 
+    // Menghapus judul section (Today/Yesterday) saat filter aktif agar tidak membingungkan
+    document.querySelectorAll('.section-title').forEach(title => title.style.display = 'none');
+
+    // Tampilkan tombol Reset
     if (!document.getElementById('reset-filter')) {
         const resetBtn = document.createElement('button');
         resetBtn.id = 'reset-filter';
-        resetBtn.innerHTML = `Tampilkan Semua (✕) | Filter: ${selectedTag}`;
-        resetBtn.className = 'reset-btn';
+        resetBtn.innerHTML = `Tampilkan Semua (✕) | Filter: ${cleanSelectedTag}`;
+        resetBtn.className = 'reset-btn'; 
         resetBtn.onclick = () => location.reload();
         document.querySelector('.container').insertBefore(resetBtn, document.getElementById('comments'));
     }
 }
 
+// ==========================================
 // 4. LOAD DATA UTAMA
+// ==========================================
+
 async function loadComments() {
     try {
         const response = await fetch(`${sheetURL}&t=${Date.now()}`);
@@ -103,20 +128,32 @@ async function loadComments() {
 
         rows.forEach((row, index) => {
             if (row.length < 2) return;
-            const time = row[0], originalContent = row[1] || '', imageLink = row[2];
-            const cL = row[3] || 0, cH = row[4] || 0, cI = row[5] || 0;
+            const time = row[0];
+            const originalContent = row[1] || '';
+            const imageLink = row[2];
+            const cL = row[3] || 0;
+            const cH = row[4] || 0;
+            const cI = row[5] || 0;
             
-            // Logika Tagar
+            // Ekstraksi Tagar
             const tagMatches = originalContent.match(/#\w+/g);
-            let tagsHTML = '', contentClean = originalContent;
+            let tagsHTML = '';
+            let contentClean = originalContent;
+
             if (tagMatches) {
                 tagsHTML = `<div class="tag-container">` + 
-                    tagMatches.map(tag => `<span class="tag" onclick="filterByTag('${tag}')">${tag}</span>`).join('') + 
+                    tagMatches.map(tag => {
+                        const t = tag.trim();
+                        return `<span class="tag" onclick="filterByTag('${t}')">${t}</span>`;
+                    }).join('') + 
                     `</div>`;
+                // Bersihkan teks dari tagar agar tidak tampil ganda
                 contentClean = originalContent.replace(/#\w+/g, '').trim();
             }
             
-            let imgHTML = imageLink && imageLink.includes('http') ? `<img src="${convertDriveLink(imageLink)}" onclick="openImage(this.src)" style="cursor:zoom-in">` : '';
+            let imgHTML = (imageLink && imageLink.includes('http')) ? 
+                `<img src="${convertDriveLink(imageLink)}" onclick="openImage(this.src)" style="cursor:zoom-in">` : '';
+            
             const originalIndex = rows.length - 1 - index;
 
             const card = `
@@ -131,17 +168,24 @@ async function loadComments() {
                         <button class="reaction-btn" onclick="addReaction(this, ${originalIndex}, 'idea')">💡 <span>${cI}</span></button>
                     </div>
                 </div>`;
+
             const group = getDateGroup(time);
             if (groups[group]) groups[group].push(card);
         });
 
         let html = '';
         ["Today", "Yesterday", "Past"].forEach(g => {
-            if (groups[g].length > 0) html += `<div class="section-title">${g}</div><div class="grid">${groups[g].join('')}</div>`;
+            if (groups[g] && groups[g].length > 0) {
+                html += `<div class="section-title">${g}</div><div class="grid">${groups[g].join('')}</div>`;
+            }
         });
-        document.getElementById('comments').innerHTML = html || '<p>Belum ada pengakuan.</p>';
-    } catch (e) { console.error(e); }
+        
+        document.getElementById('comments').innerHTML = html || '<p style="text-align:center;">Belum ada pengakuan.</p>';
+    } catch (e) { 
+        console.error("Gagal memuat data:", e); 
+    }
 }
 
+// Jalankan
 loadComments();
 setInterval(loadComments, 100000);
