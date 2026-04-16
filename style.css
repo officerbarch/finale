@@ -65,7 +65,7 @@ h1 {
 
 .comment-box:hover {
     transform: translateY(-4px);
-    background-color: #f5f5ba; /* Warna kuning sedikit lebih gelap saat hover */
+    background-color: #ffffd1; /* Warna kuning sedikit lebih gelap saat hover */
     border-color: #000000;
 }
 
