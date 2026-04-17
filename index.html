@@ -24,20 +24,16 @@
             text-shadow: none;
         }
         
-        /* Kondisi Hover (Dengan Outline) */
         .main-title:hover {
-            color: #f5f5ba; /* Warna isi teks menjadi kuning muda */
-            
-            /* MENAMBAHKAN OUTLINE HITAM */
-            /* Parameter: ketebalan (1px) dan warna (#000) */
-            -webkit-text-stroke: 0.5px #000000; 
-            
+
+            color: #f5f5ba;
+
             text-decoration-thickness: 3px;
-            
-            /* Shadow tetap ada untuk kedalaman */
-            text-shadow: 6px 6px 0px #838512, 7px 7px 0px #000000; 
-            
+
+            text-shadow: 6px 6px 0px #838512, 7px 7px 1px #838512; 
+
             transform: scale(1.05) translateY(-5px);
+
         }
         
         @keyframes pulse {
