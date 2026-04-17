@@ -24,11 +24,25 @@ background-position: center;
 
 h1 {
     text-align: center;
-    font-weight: 700;
+    font-size: 28px;
+    font-weight: 800; /* Dibuat lebih tebal agar shadow terlihat jelas */
     letter-spacing: -0.5px;
     margin-bottom: 10px;
-    display: block;    /* Memastikan elemen mengambil ruang penuh */
-    width: 100%;       /* Memastikan teks bisa berada di tengah lebar layar */
+    display: block;
+    width: 100%;
+    color: #000;
+    
+    /* EFEK SHADOW TEGAS */
+    /* 2px ke kanan, 2px ke bawah, 0px blur, warna abu-abu atau hitam */
+    text-shadow: 3px 3px 0px rgba(0,0,0,0.1); 
+    
+    transition: all 0.3s ease;
+}
+
+/* OPSIONAL: Judul juga bisa bereaksi saat di-hover */
+h1:hover {
+    text-shadow: 5px 5px 0px #FFFFE0; /* Shadow berubah warna menjadi kuning seperti box */
+    transform: translateY(-2px);
 }
 
 h2 {
