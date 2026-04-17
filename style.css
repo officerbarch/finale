@@ -25,24 +25,29 @@ background-position: center;
 h1 {
     text-align: center;
     font-size: 28px;
-    font-weight: 800; /* Dibuat lebih tebal agar shadow terlihat jelas */
+    font-weight: 800;
     letter-spacing: -0.5px;
     margin-bottom: 10px;
     display: block;
     width: 100%;
     color: #000;
     
-    /* EFEK SHADOW TEGAS */
-    /* 2px ke kanan, 2px ke bawah, 0px blur, warna abu-abu atau hitam */
-    text-shadow: 3px 3px 0px rgba(0,0,0,0.1); 
+    /* 1. Hilangkan shadow di kondisi awal */
+    text-shadow: 0px 0px 0px transparent; 
+    
+    /* 2. Pastikan skala 1.2x didefinisikan di sini agar tidak hilang saat hover */
+    transform: scale(1.2);
+    transform-origin: center;
     
     transition: all 0.3s ease;
 }
 
-/* OPSIONAL: Judul juga bisa bereaksi saat di-hover */
 h1:hover {
-    text-shadow: 5px 5px 0px #000000; /* Shadow berubah warna menjadi black seperti box */
-    transform: translateY(-2px);
+    /* 3. Munculkan shadow blok hitam pekat saat hover */
+    text-shadow: 5px 5px 0px #000000; 
+    
+    /* 4. Gabungkan skala tetap 1.2x dengan efek naik sedikit */
+    transform: scale(1.2) translateY(-2px);
 }
 
 h2 {
@@ -50,7 +55,8 @@ h2 {
     font-size: 18px;
     font-style: italic;
     font-weight: normal;
-    opacity: 0.9;
+    /* Opacity diturunkan sedikit agar tidak berebut perhatian dengan h1 */
+    opacity: 0.8; 
     margin-bottom: 30px;
     display: block;
     width: 100%;
