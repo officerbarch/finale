@@ -26,26 +26,39 @@
 </div>
 
 <style>
-/* Efek Hover untuk Judul Utama */
-.main-title:hover {
-    /* Muncul bayangan blok hitam kaku khas postmodern */
-    text-shadow: 5px 5px 0px #000000;
-    /* Sedikit mengangkat judul saat di-hover */
-    transform: scale(1.2) translateY(-3px) !important;
+/* Kondisi Normal */
+.main-title {
+    font-size: 42px; /* Ukuran setara 28px * 1.5x */
+    font-weight: 700;
+    margin-bottom: 10px;
+    display: block;
+    width: 100%;
+    color: #444; /* Warna sedikit abu-abu saat diam */
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 8px;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    cursor: default;
+    text-shadow: none;
 }
 
-/* Animasi Pulse untuk Sub-judul */
+/* Kondisi Hover (Kontras Tinggi) */
+.main-title:hover {
+    color: #000000; /* Menjadi hitam pekat */
+    text-decoration-thickness: 3px; /* Garis bawah menebal */
+    
+    /* Bayangan blok hitam pekat untuk dimensi kontras */
+    text-shadow: 6px 6px 0px #FFFFE0, 7px 7px 0px #000000; 
+    
+    /* Sedikit mengangkat dan membesar untuk efek 'pop' */
+    transform: scale(1.05) translateY(-5px);
+}
+
 @keyframes pulse {
     0% { opacity: 0.6; }
     50% { opacity: 1; }
     100% { opacity: 0.6; }
 }
-
-/* Perbaikan untuk Description Text agar justify terlihat rapi */
-.description-text {
-    display: block;
-}
-</style>
 </style>
 
     <div class="description-text" style="
