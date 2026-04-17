@@ -72,7 +72,15 @@ h2 {
     border: 1px solid #000; transition: all 0.3s ease;
 }
 
-.comment-box:hover { transform: translateY(-4px); background-color: #f5f5ba; }
+/* Cari bagian ini di style.css */
+.comment-box:hover {
+    transform: translate(-4px, -4px); /* Geser sedikit ke kiri atas */
+    background-color: #f5f5ba;
+    border-color: #000000;
+
+    /* TAMBAHKAN INI */
+    box-shadow: 6px 6px 0px #000000; /* Bayangan hitam tegas berjarak 6px */
+ }
 
 /* Styling Tagar */
 .tag-container { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 12px; }
