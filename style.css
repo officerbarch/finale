@@ -74,21 +74,18 @@ h2 {
     border: 1px solid #000;
     background: #ffffff;
     line-height: 0;
+    
+    /* 1. Set shadow awal menjadi nol/kosong */
+    box-shadow: 0px 0px 0px #000000; 
 
-    /* --- EFEK SHADOW POSTMODERN --- */
-    /* Menghasilkan bayangan hitam tegas (tanpa blur) */
-    box-shadow: 10px 10px 0px #000000; 
-
-    /* Memberi efek halus saat kursor mendekat */
+    /* 2. Transition harus tetap ada agar kemunculan bayangan halus */
     transition: all 0.3s ease;
-    cursor: pointer;
 }
 
-/* --- EFEK SAAT HOVER --- */
+/* 3. Bayangan HANYA muncul saat di-hover */
 .form-section:hover {
-    /* Box seolah terangkat lebih tinggi saat kursor di atasnya */
-    transform: translate(-2px, -2px);
-    box-shadow: 14px 14px 0px #000000;
+    transform: translate(-4px, -4px); /* Mengangkat box ke kiri-atas */
+    box-shadow: 10px 10px 0px #000000; /* Bayangan muncul ke kanan-bawah */
 }
 
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
