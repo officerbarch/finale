@@ -41,7 +41,7 @@ h1 {
 
 /* OPSIONAL: Judul juga bisa bereaksi saat di-hover */
 h1:hover {
-    text-shadow: 5px 5px 0px #FFFFE0; /* Shadow berubah warna menjadi kuning seperti box */
+    text-shadow: 5px 5px 0px #000000; /* Shadow berubah warna menjadi black seperti box */
     transform: translateY(-2px);
 }
 
