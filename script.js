@@ -1,10 +1,10 @@
-// 1. KONFIGURASI
+// 1. KONFIGURASI DATA
 const sheetURL = 'https://docs.google.com/spreadsheets/d/1jaO6kwbXqLBFzHAI9KphFX95Pxdsrgxybdg48oLhAmM/export?format=csv';
 const webAppURL = 'https://script.google.com/macros/s/AKfycbxODONMqj_nKapS5Qgda0aeYpHKjqJMvOWhU67NnUscE7MdfiswlkNGVLgkVu8jVoP1/exec'; 
 
-let allCommentsData = []; // Menyimpan data asli untuk keperluan filter
+let allCommentsData = []; // Penyimpan data untuk fitur filter
 
-// 2. FUNGSI PEMBANTU
+// 2. PARSER CSV (Menangani kutipan dan koma dalam teks)
 function parseCSV(text) {
     const rows = [];
     let row = [], cell = '', insideQuotes = false;
@@ -29,64 +29,12 @@ function parseCSV(text) {
     return rows;
 }
 
-function convertDriveLink(url) {
-    if (!url || !url.includes('drive.google.com')) return url;
-    let fileId = '';
-    const matchD = url.match(/\/d\/(.*?)\//);
-    const matchId = url.match(/[?&]id=([^&]+)/);
-    if (matchD) fileId = matchD[1];
-    else if (matchId) fileId = matchId[1];
-    return fileId ? `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000` : url;
-}
-
-function getDateGroup(dateStr) {
-    if (!dateStr) return "Past";
-    const d = new Date(dateStr);
-    if (isNaN(d)) return "Past";
-    const now = new Date();
-    const diffTime = now - d;
-    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-    if (diffDays < 1 && now.getDate() === d.getDate()) return "Today";
-    if (diffDays <= 1) return "Yesterday";
-    return "Past";
-}
-
-// 3. FUNGSI INTERAKSI & FILTER
-function openImage(src) {
-    const modal = document.getElementById('imageModal');
-    const fullImg = document.getElementById('fullImage');
-    if (modal && fullImg) {
-        modal.style.display = 'flex';
-        fullImg.src = src;
-    }
-}
-
-function addReaction(btn, rowIndex, type) {
-    const span = btn.querySelector('span');
-    let count = parseInt(span.innerText);
-    span.innerText = count + 1;
-    btn.style.transform = "scale(1.2)";
-    setTimeout(() => btn.style.transform = "scale(1)", 100);
-    fetch(`${webAppURL}?action=addReaction&row=${rowIndex}&type=${type}`).catch(err => console.error(err));
-}
-
-function toggleExpand(el) {
-    el.closest('.comment-box').classList.toggle('expanded');
-}
-
-function filterByTag(selectedTag) {
-    const cleanTag = selectedTag.trim().toLowerCase();
-    const filteredData = allCommentsData.filter(item => {
-        return item.content.toLowerCase().includes(cleanTag);
-    });
-    renderComments(filteredData, true, selectedTag);
-}
-
-// 4. FUNGSI RENDER (DENGAN LOGIKA WARNA KATEGORI)
+// 3. LOGIKA RENDER & KATEGORISASI VISUAL
 function renderComments(dataArray, isFiltering = false, tagLabel = "") {
     const container = document.getElementById('comments');
     const groups = { "Today": [], "Yesterday": [], "Past": [] };
     
+    // Reset Filter Button Management
     const oldBtn = document.getElementById('reset-filter');
     if (oldBtn) oldBtn.remove();
 
@@ -100,7 +48,7 @@ function renderComments(dataArray, isFiltering = false, tagLabel = "") {
     }
 
     dataArray.forEach((item) => {
-        // --- LOGIKA DETEKSI KATEGORI WARNA ---
+        // --- DETEKSI KATEGORI UNTUK WARNA ---
         const contentLower = item.content.toLowerCase();
         let categoryClass = '';
         
@@ -112,6 +60,7 @@ function renderComments(dataArray, isFiltering = false, tagLabel = "") {
             categoryClass = 'tag-qna';
         }
 
+        // --- DETEKSI & EKSTRAKSI TAGAR ---
         const tagMatches = item.content.match(/#\w+/g);
         let tagsHTML = '';
         let contentClean = item.content;
@@ -123,19 +72,20 @@ function renderComments(dataArray, isFiltering = false, tagLabel = "") {
                     return `<span class="tag" onclick="filterByTag('${t}')">${t}</span>`;
                 }).join('') + 
                 `</div>`;
+            // Opsional: hapus tagar dari teks utama agar tidak double visual
             contentClean = item.content.replace(/#\w+/g, '').trim();
         }
 
+        // --- IMAGE HANDLING ---
         let imgHTML = item.image && item.image.includes('http') ? 
             `<img src="${convertDriveLink(item.image)}" onclick="openImage(this.src)">` : '';
 
-        // Masukkan categoryClass ke dalam class comment-box
+        // --- CONSTRUCT CARD HTML ---
         const card = `
             <div class="comment-box ${categoryClass}">
                 ${tagsHTML}
                 <div class="comment-text">${contentClean}</div>
                 ${imgHTML}
-                <div class="read-more" onclick="toggleExpand(this)">Lihat+</div>
                 <div class="reaction-bar">
                     <button class="reaction-btn" onclick="addReaction(this, ${item.originalRow}, 'like')">🥺 <span>${item.like}</span></button>
                     <button class="reaction-btn" onclick="addReaction(this, ${item.originalRow}, 'hug')">😭 <span>${item.hug}</span></button>
@@ -147,6 +97,7 @@ function renderComments(dataArray, isFiltering = false, tagLabel = "") {
         if (groups[group]) groups[group].push(card);
     });
 
+    // --- DRAW TO SCREEN ---
     let html = '';
     ["Today", "Yesterday", "Past"].forEach(g => {
         if (groups[g] && groups[g].length > 0) {
@@ -155,10 +106,49 @@ function renderComments(dataArray, isFiltering = false, tagLabel = "") {
         }
     });
 
-    container.innerHTML = html || '<p style="text-align:center; padding:20px;">Tidak ditemukan pengakuan dengan tagar tersebut.</p>';
+    container.innerHTML = html || '<p style="text-align:center; padding:20px;">Belum ada pengakuan untuk kategori ini.</p>';
 }
 
-// 5. LOAD DATA AWAL
+// 4. FUNGSI UTILS & INTERAKSI
+function convertDriveLink(url) {
+    if (!url || !url.includes('drive.google.com')) return url;
+    const match = url.match(/\/d\/(.*?)\//) || url.match(/[?&]id=([^&]+)/);
+    return match ? `https://drive.google.com/thumbnail?id=${match[1]}&sz=w1000` : url;
+}
+
+function getDateGroup(dateStr) {
+    if (!dateStr) return "Past";
+    const d = new Date(dateStr);
+    if (isNaN(d)) return "Past";
+    const now = new Date();
+    const diffDays = Math.floor((now - d) / (1000 * 60 * 60 * 24));
+    if (diffDays < 1 && now.getDate() === d.getDate()) return "Today";
+    if (diffDays <= 1) return "Yesterday";
+    return "Past";
+}
+
+function filterByTag(selectedTag) {
+    const cleanTag = selectedTag.trim().toLowerCase();
+    const filteredData = allCommentsData.filter(item => item.content.toLowerCase().includes(cleanTag));
+    renderComments(filteredData, true, selectedTag);
+}
+
+function openImage(src) {
+    const modal = document.getElementById('imageModal');
+    const fullImg = document.getElementById('fullImage');
+    modal.style.display = 'flex';
+    fullImg.src = src;
+}
+
+function addReaction(btn, rowIndex, type) {
+    const span = btn.querySelector('span');
+    span.innerText = parseInt(span.innerText) + 1;
+    btn.style.transform = "scale(1.2)";
+    setTimeout(() => btn.style.transform = "scale(1)", 100);
+    fetch(`${webAppURL}?action=addReaction&row=${rowIndex}&type=${type}`).catch(e => console.error(e));
+}
+
+// 5. INITIAL LOAD
 async function loadComments() {
     try {
         const response = await fetch(`${sheetURL}&t=${Date.now()}`);
@@ -177,9 +167,10 @@ async function loadComments() {
 
         renderComments(allCommentsData);
     } catch (e) { 
-        console.error("Gagal memuat data:", e); 
+        console.error("Fetch Error:", e); 
     }
 }
 
+// Auto refresh setiap 1 menit
 loadComments();
-setInterval(loadComments, 100000);
+setInterval(loadComments, 60000);
