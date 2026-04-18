@@ -29,10 +29,10 @@ body {
     letter-spacing: -0.5px;
     margin-bottom: 10px;
     display: block;
-    width: 100%;
+    width: 90%;
     color: #000;
     text-decoration: underline;
-    text-decoration-thickness: 1px;
+    text-decoration-thickness: 3px;
     text-underline-offset: 8px;
     
     /* Kondisi awal skala 1.2x */
