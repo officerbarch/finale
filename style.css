@@ -43,13 +43,6 @@ body {
     cursor: default;
 }
 
-.main-title:hover {
-    color: #f5f5ba;
-    -webkit-text-stroke: 1px #000;
-    text-decoration-thickness: 3px;
-    text-shadow: 7px 7px 0px #000000;
-    transform: scale(1.2) translateY(-5px);
-}
 
 .description-text {
     max-width: 800px;
