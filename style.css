@@ -109,17 +109,17 @@ h2 {
 
 /* Spektrum Mint: Reply */
 .comment-box.tag-reply {
-    background-color: #D4EFDF !important;
+    background-color: #D4EFDF ;
 }
 
 /* Spektrum Peach: JustListen */
 .comment-box.tag-listen {
-    background-color: #FADBD8 !important;  
+    background-color: #FADBD8 ;  
 }
 
 /* Spektrum Ice Blue: QnA */
 .comment-box.tag-qna {
-    background-color: #D6EAF8 !important;
+    background-color: #D6EAF8 ;
 }
 
 .comment-box:hover {
