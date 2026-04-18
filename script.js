@@ -45,8 +45,8 @@ function renderComments(dataArray, isFiltering = false, tagLabel = "") {
         let tagsHTML = tagMatches ? `<div class="tag-container">${tagMatches.map(t => `<span class="tag" onclick="filterByTag('${t}')">${t}</span>`).join('')}</div>` : '';
         let contentClean = item.content.replace(/#\w+/g, '').trim();
 
-        // Logika Read More
-        const showReadMore = contentClean.length > 150; 
+        // Tampilkan tombol Read More jika teks panjang (> 180 karakter)
+        const needsReadMore = contentClean.length > 180;
 
         let imgHTML = item.image && item.image.includes('http') ? 
             `<img src="${convertDriveLink(item.image)}" onclick="openImage(this.src)">` : '';
@@ -55,7 +55,7 @@ function renderComments(dataArray, isFiltering = false, tagLabel = "") {
             <div class="comment-box ${categoryClass}">
                 ${tagsHTML}
                 <div class="comment-text">${contentClean}</div>
-                ${showReadMore ? `<div class="read-more" onclick="toggleExpand(this)">Lihat Selengkapnya+</div>` : ''}
+                ${needsReadMore ? `<div class="read-more" onclick="toggleExpand(this)">Lihat Selengkapnya+</div>` : ''}
                 ${imgHTML}
                 <div class="reaction-bar">
                     <button class="reaction-btn" onclick="addReaction(this, ${item.originalRow}, 'like')">🥺 <span>${item.like}</span></button>
@@ -75,13 +75,13 @@ function renderComments(dataArray, isFiltering = false, tagLabel = "") {
             html += `<div class="grid">${groups[g].join('')}</div>`;
         }
     });
-    container.innerHTML = html || '<p style="text-align:center;">Tidak ditemukan data.</p>';
+    container.innerHTML = html || '<p style="text-align:center; padding:20px;">Belum ada data pengakuan.</p>';
 }
 
-function toggleExpand(el) {
-    const box = el.closest('.comment-box');
+function toggleExpand(btn) {
+    const box = btn.parentElement;
     const isExpanded = box.classList.toggle('expanded');
-    el.innerText = isExpanded ? "Sembunyikan-" : "Lihat Selengkapnya+";
+    btn.innerText = isExpanded ? "Sembunyikan-" : "Lihat Selengkapnya+";
 }
 
 function convertDriveLink(url) {
