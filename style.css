@@ -34,20 +34,9 @@ body {
     text-decoration: underline;
     text-decoration-thickness: 3px;
     text-underline-offset: 8px;
-    
-    /* Kondisi awal skala 1.2x */
-    transform: scale(1.2);
-    transform-origin: center;
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
 }
 
-.main-title:hover {
-    color: #f5f5ba;
-    -webkit-text-stroke: 1px #000; /* Outline hitam tajam */
-    text-decoration-thickness: 3px;
-    text-shadow: 7px 7px 0px #000000; 
-    transform: scale(1.2) translateY(-5px); /* Tetap 1.2x tapi naik sedikit */
-}
 
 h2 {
     text-align: center;
