@@ -110,19 +110,16 @@ h2 {
 /* Spektrum Mint: Reply */
 .comment-box.tag-reply {
     background-color: #D4EFDF !important;
-    
 }
 
 /* Spektrum Peach: JustListen */
 .comment-box.tag-listen {
-    background-color: #FADBD8 !important;
-    
+    background-color: #FADBD8 !important;  
 }
 
 /* Spektrum Ice Blue: QnA */
 .comment-box.tag-qna {
     background-color: #D6EAF8 !important;
-    
 }
 
 .comment-box:hover {
