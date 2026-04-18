@@ -18,6 +18,25 @@ function parseCSV(text) {
     return rows;
 }
 
+// FUNGSI KRITIKAL: Mengubah Link Drive menjadi Gambar
+function convertDriveLink(url) {
+    if (!url) return '';
+    let fileId = '';
+    // Pola 1: /d/ID/view
+    const matchD = url.match(/\/d\/(.*?)\//);
+    // Pola 2: ?id=ID
+    const matchId = url.match(/[?&]id=([^&]+)/);
+    
+    if (matchD) fileId = matchD[1];
+    else if (matchId) fileId = matchId[1];
+    
+    // Jika itu link Google Drive, ubah ke format Thumbnail Resolusi Tinggi
+    if (url.includes('drive.google.com')) {
+        return `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`;
+    }
+    return url; // Jika link gambar biasa (direct link), biarkan saja
+}
+
 function renderComments(dataArray, isFiltering = false, tagLabel = "") {
     const container = document.getElementById('comments');
     const groups = { "Today": [], "Yesterday": [], "Past": [] };
@@ -41,39 +60,35 @@ function renderComments(dataArray, isFiltering = false, tagLabel = "") {
         else if (contentLower.includes('#justlisten')) categoryClass = 'tag-listen';
         else if (contentLower.includes('#qna')) categoryClass = 'tag-qna';
 
-        // --- LOGIKA EKSTRAKSI GAMBAR DARI TEKS ---
         let rawContent = item.content;
         let extractedImgHTML = '';
         
-        // Pattern untuk mendeteksi link (Drive, JPG, PNG, dll)
-        const imagePattern = /(https?:\/\/[^\s]+(?:\.jpg|\.jpeg|\.png|\.gif|drive\.google\.com[^\s]+))/gi;
-        const foundImages = rawContent.match(imagePattern);
+        // Pattern untuk mendeteksi URL (termasuk Drive)
+        const urlPattern = /(https?:\/\/[^\s]+)/gi;
+        const foundUrls = rawContent.match(urlPattern);
 
-        if (foundImages) {
-            foundImages.forEach(link => {
-                extractedImgHTML += `<img src="${convertDriveLink(link)}" onclick="openImage(this.src)" style="margin-top:10px; border-radius:8px; border:1px solid #000;">`;
-                // Hapus link dari teks agar tampilan narasi bersih
-                rawContent = rawContent.replace(link, '');
+        if (foundUrls) {
+            foundUrls.forEach(link => {
+                // Periksa apakah ini link gambar atau Google Drive
+                if (link.match(/\.(jpeg|jpg|gif|png)$/i) || link.includes('drive.google.com')) {
+                    extractedImgHTML += `<img src="${convertDriveLink(link)}" onclick="openImage(this.src)" style="margin-top:15px; width:100%; border-radius:8px; border:1px solid #000; cursor:zoom-in;">`;
+                    rawContent = rawContent.replace(link, ''); // Hapus link dari teks
+                }
             });
         }
 
         const tagMatches = rawContent.match(/#\w+/g);
         let tagsHTML = tagMatches ? `<div class="tag-container">${tagMatches.map(t => `<span class="tag" onclick="filterByTag('${t}')">${t}</span>`).join('')}</div>` : '';
         
-        // Bersihkan teks dari sisa tagar
         let contentClean = rawContent.replace(/#\w+/g, '').trim();
-
-        // Logika Read More
-        const needsReadMore = contentClean.length > 180;
+        const needsReadMore = contentClean.length > 200;
 
         const card = `
             <div class="comment-box ${categoryClass}">
                 ${tagsHTML}
                 <div class="comment-text">${contentClean}</div>
                 ${needsReadMore ? `<div class="read-more" onclick="toggleExpand(this)">Lihat Selengkapnya+</div>` : ''}
-                
                 ${extractedImgHTML}
-                
                 <div class="reaction-bar">
                     <button class="reaction-btn" onclick="addReaction(this, ${item.originalRow}, 'like')">🥺 <span>${item.like}</span></button>
                     <button class="reaction-btn" onclick="addReaction(this, ${item.originalRow}, 'hug')">😭 <span>${item.hug}</span></button>
@@ -92,19 +107,13 @@ function renderComments(dataArray, isFiltering = false, tagLabel = "") {
             html += `<div class="grid">${groups[g].join('')}</div>`;
         }
     });
-    container.innerHTML = html || '<p style="text-align:center; padding:20px;">Belum ada data pengakuan.</p>';
+    container.innerHTML = html || '<p style="text-align:center; padding:20px;">Belum ada data.</p>';
 }
 
 function toggleExpand(btn) {
     const box = btn.parentElement;
     const isExpanded = box.classList.toggle('expanded');
     btn.innerText = isExpanded ? "Sembunyikan-" : "Lihat Selengkapnya+";
-}
-
-function convertDriveLink(url) {
-    // Menangani link Drive agar bisa langsung dirender sebagai thumbnail/image
-    const match = url.match(/\/d\/(.*?)\//) || url.match(/[?&]id=([^&]+)/);
-    return match ? `https://drive.google.com/thumbnail?id=${match[1]}&sz=w1000` : url;
 }
 
 function getDateGroup(dateStr) {
@@ -119,7 +128,12 @@ function getDateGroup(dateStr) {
 
 function filterByTag(tag) { renderComments(allCommentsData.filter(i => i.content.toLowerCase().includes(tag.toLowerCase())), true, tag); }
 
-function openImage(src) { document.getElementById('imageModal').style.display = 'flex'; document.getElementById('fullImage').src = src; }
+function openImage(src) { 
+    const modal = document.getElementById('imageModal');
+    const fullImg = document.getElementById('fullImage');
+    modal.style.display = 'flex'; 
+    fullImg.src = src; 
+}
 
 function addReaction(btn, rowIndex, type) {
     const span = btn.querySelector('span');
@@ -132,19 +146,14 @@ async function loadComments() {
         const response = await fetch(`${sheetURL}&t=${Date.now()}`);
         const text = await response.text();
         const rows = parseCSV(text).slice(1);
-        
-        // Kita tetap membaca kolom sesuai urutan di Sheet:
-        // row[0]=Time, row[1]=Content, row[3]=Like, row[4]=Hug, row[5]=Idea
         allCommentsData = rows.map((row, index) => ({
             originalRow: index + 2, 
             time: row[0], 
             content: row[1] || '', 
-            // image: row[2], // Kita abaikan kolom C (index 2) jika link sudah menyatu di kolom B
             like: row[3] || 0, 
             hug: row[4] || 0, 
             idea: row[5] || 0
         })).reverse(); 
-
         renderComments(allCommentsData);
     } catch (e) { console.error(e); }
 }
