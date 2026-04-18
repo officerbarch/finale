@@ -97,13 +97,19 @@ h2 {
 
 /* --- DYNAMIC COMMENT BOX CATEGORIES --- */
 .comment-box {
-    background: #FFFFE0; /* Default: Confess */
+    background: #FFFFE0; 
     padding: 20px;
-    border-radius: 10px;
+    border-radius: 12px; /* Sesuaikan lengkungan agar lebih halus */
     display: flex;
     flex-direction: column;
     position: relative;
-    border: 1px solid #000;
+    
+    /* Gunakan satu border yang mengelilingi seluruh kotak */
+    border: 1px solid #000000; 
+    
+    /* Pastikan tidak ada border-left sisa */
+    border-left: 1px solid #000000; 
+    
     transition: all 0.3s ease;
 }
 
