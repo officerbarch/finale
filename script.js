@@ -74,28 +74,22 @@ function toggleExpand(el) {
     el.closest('.comment-box').classList.toggle('expanded');
 }
 
-// FUNGSI FILTER UTAMA (Membandingkan teks tanpa peduli Case Sensitive)
 function filterByTag(selectedTag) {
     const cleanTag = selectedTag.trim().toLowerCase();
-    
-    // Filter dari data global yang sudah disimpan
     const filteredData = allCommentsData.filter(item => {
         return item.content.toLowerCase().includes(cleanTag);
     });
-
     renderComments(filteredData, true, selectedTag);
 }
 
-// 4. FUNGSI RENDER (Menampilkan data ke layar)
+// 4. FUNGSI RENDER (DENGAN LOGIKA WARNA KATEGORI)
 function renderComments(dataArray, isFiltering = false, tagLabel = "") {
     const container = document.getElementById('comments');
     const groups = { "Today": [], "Yesterday": [], "Past": [] };
     
-    // Hapus tombol reset lama
     const oldBtn = document.getElementById('reset-filter');
     if (oldBtn) oldBtn.remove();
 
-    // Jika sedang memfilter, tampilkan tombol reset di atas
     if (isFiltering) {
         const resetBtn = document.createElement('button');
         resetBtn.id = 'reset-filter';
@@ -106,7 +100,18 @@ function renderComments(dataArray, isFiltering = false, tagLabel = "") {
     }
 
     dataArray.forEach((item) => {
-        // Deteksi Tagar
+        // --- LOGIKA DETEKSI KATEGORI WARNA ---
+        const contentLower = item.content.toLowerCase();
+        let categoryClass = '';
+        
+        if (contentLower.includes('#reply')) {
+            categoryClass = 'tag-reply';
+        } else if (contentLower.includes('#justlisten')) {
+            categoryClass = 'tag-listen';
+        } else if (contentLower.includes('#qna')) {
+            categoryClass = 'tag-qna';
+        }
+
         const tagMatches = item.content.match(/#\w+/g);
         let tagsHTML = '';
         let contentClean = item.content;
@@ -118,15 +123,15 @@ function renderComments(dataArray, isFiltering = false, tagLabel = "") {
                     return `<span class="tag" onclick="filterByTag('${t}')">${t}</span>`;
                 }).join('') + 
                 `</div>`;
-            // Sembunyikan tagar di dalam isi teks utama
             contentClean = item.content.replace(/#\w+/g, '').trim();
         }
 
         let imgHTML = item.image && item.image.includes('http') ? 
             `<img src="${convertDriveLink(item.image)}" onclick="openImage(this.src)">` : '';
 
+        // Masukkan categoryClass ke dalam class comment-box
         const card = `
-            <div class="comment-box">
+            <div class="comment-box ${categoryClass}">
                 ${tagsHTML}
                 <div class="comment-text">${contentClean}</div>
                 ${imgHTML}
@@ -142,7 +147,6 @@ function renderComments(dataArray, isFiltering = false, tagLabel = "") {
         if (groups[group]) groups[group].push(card);
     });
 
-    // Susun tampilan HTML
     let html = '';
     ["Today", "Yesterday", "Past"].forEach(g => {
         if (groups[g] && groups[g].length > 0) {
@@ -161,7 +165,6 @@ async function loadComments() {
         const text = await response.text();
         const rows = parseCSV(text).slice(1);
         
-        // Simpan ke variabel global
         allCommentsData = rows.map((row, index) => ({
             originalRow: index + 2, 
             time: row[0],
