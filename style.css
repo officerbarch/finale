@@ -1,92 +1,209 @@
-<style>
-    /* --- BASE STYLE & GRID --- */
-    body {
-        font-family: 'Roboto', sans-serif;
-        margin: 0; padding: 0; color: #000000; padding-bottom: 80px;
-        background-color: #ffffff;
-        background-image: 
-            linear-gradient(90deg, rgba(111,110,109,0.1) 1px, transparent 1px),
-            linear-gradient(rgba(111,110,109,0.1) 1px, transparent 1px);
-        background-size: 40px 40px; background-position: center;
-    }
+/* --- BASE STYLE & ARCHITECTURAL GRID --- */
+body {
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    padding: 0;
+    color: #000000;
+    padding-bottom: 80px;
+    background-color: #ffffff;
+    /* Grid 40px khas kertas milimeter/arsitektur */
+    background-image: 
+        linear-gradient(90deg, rgba(111,110,109,0.1) 1px, transparent 1px),
+        linear-gradient(rgba(111,110,109,0.1) 1px, transparent 1px);
+    background-size: 40px 40px;
+    background-position: center;
+}
 
-    .container { max-width: 1000px; margin: 40px auto; padding: 20px; }
+.container {
+    max-width: 1000px;
+    margin: 40px auto;
+    padding: 20px;
+}
 
-    /* --- HEADER SECTION --- */
-    .header-section { text-align: center; margin-bottom: 60px; padding-top: 20px; }
-    .main-title {
-        font-size: 32px; font-weight: 800; margin-bottom: 15px; display: block;
-        width: 100%; color: #000; text-decoration: underline;
-        text-decoration-thickness: 1px; text-underline-offset: 8px;
-        transform: scale(1.2); transform-origin: center;
-        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-    .main-title:hover {
-        color: #f5f5ba; -webkit-text-stroke: 1px #000;
-        text-decoration-thickness: 3px; text-shadow: 7px 7px 0px #000000; 
-        transform: scale(1.2) translateY(-5px);
-    }
+/* --- HEADER SECTION --- */
+.header-section {
+    text-align: center;
+    margin-bottom: 60px;
+    padding-top: 20px;
+}
 
-    .description-text {
-        max-width: 800px; margin: 40px auto 0 auto; text-align: justify;
-        line-height: 1.8; color: #333; font-size: 15px;
-        border-top: 1px solid #000; padding-top: 20px;
-    }
+.main-title {
+    font-size: 32px;
+    font-weight: 800;
+    margin-bottom: 15px;
+    display: block;
+    width: 100%;
+    color: #000;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 8px;
+    transform: scale(1.2);
+    transform-origin: center;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    cursor: default;
+}
 
-    .tag-legend { margin-top: 15px; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; font-family: monospace; }
-    .legend-item { border: 1px solid #000; padding: 2px 8px; border-radius: 4px; font-weight: bold; }
+.main-title:hover {
+    color: #f5f5ba;
+    -webkit-text-stroke: 1px #000;
+    text-decoration-thickness: 3px;
+    text-shadow: 7px 7px 0px #000000;
+    transform: scale(1.2) translateY(-5px);
+}
 
-    /* --- FORM SECTION --- */
-    .form-section {
-        max-width: 800px; margin: 0 auto 50px auto; border-radius: 12px;
-        overflow: hidden; border: 1px solid #000; background: #ffffff;
-        transition: all 0.3s ease;
-    }
-    .form-section:hover { transform: translate(-4px, -4px); box-shadow: 10px 10px 0px #000000; }
+.description-text {
+    max-width: 800px;
+    margin: 40px auto 0 auto;
+    text-align: justify;
+    line-height: 1.8;
+    color: #333;
+    font-size: 15px;
+    border-top: 1px solid #000;
+    padding-top: 20px;
+}
 
-    /* --- COMMENT BOX STYLE (SIMETRIS) --- */
-    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
-    
-    .comment-box {
-        background: #FFFFE0; padding: 20px; border-radius: 10px;
-        display: flex; flex-direction: column; border: 1px solid #000;
-        transition: all 0.3s ease; position: relative;
-    }
+/* --- TAG LEGEND (Instruksi Warna) --- */
+.tag-legend {
+    margin-top: 15px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    font-family: monospace;
+}
 
-    /* Kategori Warna (Tanpa Border-Left tebal) */
-    .comment-box.tag-reply { background-color: #D4EFDF !important; }
-    .comment-box.tag-listen { background-color: #FADBD8 !important; }
-    .comment-box.tag-qna { background-color: #D6EAF8 !important; }
+.legend-item {
+    border: 1px solid #000;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: bold;
+}
 
-    .comment-box:hover { transform: translate(-6px, -6px); box-shadow: 8px 8px 0px #000000; }
+/* --- FORM SECTION --- */
+.form-section {
+    max-width: 800px;
+    margin: 0 auto 50px auto;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #000;
+    background: #ffffff;
+    transition: all 0.3s ease;
+    line-height: 0;
+}
 
-    /* --- LOGIKA HIDE TEXT --- */
-    .comment-text {
-        font-size: 15px; line-height: 1.6; margin-bottom: 10px;
-        white-space: pre-wrap; color: #000;
-        max-height: 120px; /* Batasi tinggi teks */
-        overflow: hidden; transition: max-height 0.4s ease;
-    }
-    .comment-box.expanded .comment-text { max-height: 2000px; }
+.form-section:hover {
+    transform: translate(-4px, -4px);
+    box-shadow: 10px 10px 0px #000000;
+}
 
-    .read-more {
-        font-size: 13px; font-weight: 800; cursor: pointer;
-        text-decoration: underline; margin-bottom: 15px; display: inline-block;
-    }
+/* --- COMMENT BOX SYSTEM (SIMETRIS) --- */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
 
-    .tag-container { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 12px; }
-    .tag { background: #000; color: #fff; padding: 2px 8px; font-size: 11px; font-weight: 700; border-radius: 4px; cursor: pointer; }
-    
-    .comment-box img { width: 100%; height: 200px; object-fit: cover; border-radius: 6px; margin-bottom: 15px; border: 1px solid #000; }
+.comment-box {
+    background-color: #FFFFE0; /* Default: Confess */
+    padding: 20px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #000; /* Garis tipis merata di semua sisi */
+    transition: all 0.3s ease;
+    position: relative;
+    box-sizing: border-box;
+}
 
-    .reset-btn {
-        background: #000; color: #fff; border: none; padding: 10px 20px;
-        font-weight: 700; margin-bottom: 40px; cursor: pointer; border-radius: 4px; display: block;
-    }
+/* --- LOGIKA WARNA & HOVER PER KATEGORI (Permintaan Bapak) --- */
 
-    .reaction-bar { display: flex; gap: 8px; margin-top: auto; }
-    .reaction-btn { background: #fff; border: 1px solid #000; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; }
-    
-    @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
-    footer { position: fixed; bottom: 0; left: 0; width: 100%; background: #ffffff; text-align: center; padding: 10px; font-size: 12px; border-top: 1px solid #ddd; z-index: 1000; }
-</style>
+/* 1. Confess (#FFFFE0 -> #f5f5ba) */
+.comment-box:hover {
+    background-color: #f5f5ba;
+    transform: translate(-6px, -6px);
+    box-shadow: 8px 8px 0px #000000;
+}
+
+/* 2. Reply (#D4EFDF -> #A9DFBF) */
+.comment-box.tag-reply { background-color: #D4EFDF !important; }
+.comment-box.tag-reply:hover { background-color: #A9DFBF !important; }
+
+/* 3. JustListen (#FADBD8 -> #F5B7B1) */
+.comment-box.tag-listen { background-color: #FADBD8 !important; }
+.comment-box.tag-listen:hover { background-color: #F5B7B1 !important; }
+
+/* 4. QnA (#D6EAF8 -> #AED6F1) */
+.comment-box.tag-qna { background-color: #D6EAF8 !important; }
+.comment-box.tag-qna:hover { background-color: #AED6F1 !important; }
+
+
+/* --- MEKANISME HIDE/SHOW TEXT --- */
+.comment-text {
+    font-size: 15px;
+    line-height: 1.6;
+    margin-bottom: 10px;
+    white-space: pre-wrap;
+    color: #000;
+    max-height: 120px; /* Batasi tinggi teks awal */
+    overflow: hidden;   /* Sembunyikan teks yang tumpah */
+    transition: max-height 0.4s ease-in-out;
+}
+
+.comment-box.expanded .comment-text {
+    max-height: 2000px; /* Tinggi maksimal saat terbuka */
+}
+
+.read-more {
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+    text-decoration: underline;
+    margin-bottom: 15px;
+    display: inline-block;
+    color: #444;
+}
+
+/* --- ELEMEN TAMBAHAN --- */
+.tag-container { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 12px; }
+.tag {
+    background: #000; color: #fff; padding: 2px 8px; font-size: 11px;
+    font-weight: 700; border-radius: 4px; cursor: pointer;
+}
+
+.comment-box img {
+    width: 100%; height: 200px; object-fit: cover;
+    border-radius: 6px; margin-bottom: 15px; border: 1px solid #000;
+}
+
+.reset-btn {
+    background: #000; color: #fff; border: none; padding: 10px 20px;
+    font-weight: 700; margin-bottom: 40px; cursor: pointer; border-radius: 4px;
+    display: block; transition: 0.2s;
+}
+
+.reaction-bar { display: flex; gap: 8px; margin-top: auto; }
+.reaction-btn {
+    background: #fff; border: 1px solid #000; padding: 4px 10px;
+    border-radius: 4px; cursor: pointer; font-weight: bold;
+}
+
+.section-title {
+    grid-column: 1 / -1; font-size: 18px; font-weight: 700;
+    margin: 30px 0 10px; padding-bottom: 5px; border-bottom: 3px solid #000;
+}
+
+/* --- MODAL & FOOTER --- */
+footer {
+    position: fixed; bottom: 0; left: 0; width: 100%;
+    background: #ffffff; text-align: center; padding: 10px;
+    font-size: 12px; border-top: 1px solid #ddd; z-index: 1000;
+}
+
+#imageModal {
+    display:none; position:fixed; z-index:9999; top:0; left:0;
+    width:100%; height:100%; background:rgba(0,0,0,0.9);
+    align-items:center; justify-content:center;
+}
+
+/* Responsive */
+@media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
