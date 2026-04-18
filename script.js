@@ -41,22 +41,39 @@ function renderComments(dataArray, isFiltering = false, tagLabel = "") {
         else if (contentLower.includes('#justlisten')) categoryClass = 'tag-listen';
         else if (contentLower.includes('#qna')) categoryClass = 'tag-qna';
 
-        const tagMatches = item.content.match(/#\w+/g);
+        // --- LOGIKA EKSTRAKSI GAMBAR DARI TEKS ---
+        let rawContent = item.content;
+        let extractedImgHTML = '';
+        
+        // Pattern untuk mendeteksi link (Drive, JPG, PNG, dll)
+        const imagePattern = /(https?:\/\/[^\s]+(?:\.jpg|\.jpeg|\.png|\.gif|drive\.google\.com[^\s]+))/gi;
+        const foundImages = rawContent.match(imagePattern);
+
+        if (foundImages) {
+            foundImages.forEach(link => {
+                extractedImgHTML += `<img src="${convertDriveLink(link)}" onclick="openImage(this.src)" style="margin-top:10px; border-radius:8px; border:1px solid #000;">`;
+                // Hapus link dari teks agar tampilan narasi bersih
+                rawContent = rawContent.replace(link, '');
+            });
+        }
+
+        const tagMatches = rawContent.match(/#\w+/g);
         let tagsHTML = tagMatches ? `<div class="tag-container">${tagMatches.map(t => `<span class="tag" onclick="filterByTag('${t}')">${t}</span>`).join('')}</div>` : '';
-        let contentClean = item.content.replace(/#\w+/g, '').trim();
+        
+        // Bersihkan teks dari sisa tagar
+        let contentClean = rawContent.replace(/#\w+/g, '').trim();
 
-        // Tampilkan tombol Read More jika teks panjang (> 180 karakter)
+        // Logika Read More
         const needsReadMore = contentClean.length > 180;
-
-        let imgHTML = item.image && item.image.includes('http') ? 
-            `<img src="${convertDriveLink(item.image)}" onclick="openImage(this.src)">` : '';
 
         const card = `
             <div class="comment-box ${categoryClass}">
                 ${tagsHTML}
                 <div class="comment-text">${contentClean}</div>
                 ${needsReadMore ? `<div class="read-more" onclick="toggleExpand(this)">Lihat Selengkapnya+</div>` : ''}
-                ${imgHTML}
+                
+                ${extractedImgHTML}
+                
                 <div class="reaction-bar">
                     <button class="reaction-btn" onclick="addReaction(this, ${item.originalRow}, 'like')">🥺 <span>${item.like}</span></button>
                     <button class="reaction-btn" onclick="addReaction(this, ${item.originalRow}, 'hug')">😭 <span>${item.hug}</span></button>
@@ -85,6 +102,7 @@ function toggleExpand(btn) {
 }
 
 function convertDriveLink(url) {
+    // Menangani link Drive agar bisa langsung dirender sebagai thumbnail/image
     const match = url.match(/\/d\/(.*?)\//) || url.match(/[?&]id=([^&]+)/);
     return match ? `https://drive.google.com/thumbnail?id=${match[1]}&sz=w1000` : url;
 }
@@ -114,10 +132,19 @@ async function loadComments() {
         const response = await fetch(`${sheetURL}&t=${Date.now()}`);
         const text = await response.text();
         const rows = parseCSV(text).slice(1);
+        
+        // Kita tetap membaca kolom sesuai urutan di Sheet:
+        // row[0]=Time, row[1]=Content, row[3]=Like, row[4]=Hug, row[5]=Idea
         allCommentsData = rows.map((row, index) => ({
-            originalRow: index + 2, time: row[0], content: row[1] || '', image: row[2],
-            like: row[3] || 0, hug: row[4] || 0, idea: row[5] || 0
+            originalRow: index + 2, 
+            time: row[0], 
+            content: row[1] || '', 
+            // image: row[2], // Kita abaikan kolom C (index 2) jika link sudah menyatu di kolom B
+            like: row[3] || 0, 
+            hug: row[4] || 0, 
+            idea: row[5] || 0
         })).reverse(); 
+
         renderComments(allCommentsData);
     } catch (e) { console.error(e); }
 }
