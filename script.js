@@ -1,5 +1,5 @@
 const sheetURL = 'https://docs.google.com/spreadsheets/d/1jaO6kwbXqLBFzHAI9KphFX95Pxdsrgxybdg48oLhAmM/export?format=csv';
-const webAppURL = 'https://script.google.com/macros/s/AKfycbxODONMqj_nKapS5Qgda0aeYpHKjqJMvOWhU67NnUscE7MdfiswlkNGVLgkVu8jVoP1/exec'; 
+const webAppURL = 'https://script.google.com/macros/s/AKfycbxK_doD1k-X4hmPY057DfOhW8H36_9l8Wdm9WnR0s8m0EtfmzD3pQy8SJutyN19GnY7/exec'; 
 
 let allCommentsData = [];
 
