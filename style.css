@@ -43,7 +43,6 @@ body {
     cursor: default;
 }
 
-
 .description-text {
     max-width: 800px;
     margin: 40px auto 0 auto;
@@ -89,11 +88,15 @@ body {
     box-shadow: 10px 10px 0px #000000;
 }
 
-/* --- COMMENT BOX SYSTEM (SIMETRIS) --- */
+/* --- COMMENT BOX SYSTEM (DYNAMIC GRID) --- */
 .grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 20px;
+    /* SOLUSI: Mengatur baris grid agar fleksibel mengikuti tinggi konten asli */
+    grid-auto-rows: minmax(min-content, max-content);
+    gap: 30px;
+    align-items: start; /* Mencegah item dipaksa meregang vertikal */
+    margin-bottom: 40px;
 }
 
 .comment-box {
@@ -106,9 +109,12 @@ body {
     transition: all 0.3s ease;
     position: relative;
     box-sizing: border-box;
+    /* SOLUSI: Menghilangkan pembatasan tinggi statis */
+    height: auto;
+    min-height: 180px; 
 }
 
-/* --- LOGIKA WARNA & HOVER PER KATEGORI (Permintaan Bapak) --- */
+/* --- LOGIKA WARNA & HOVER PER KATEGORI --- */
 
 /* 1. Confess (#FFFFE0 -> #f5f5ba) */
 .comment-box:hover {
@@ -118,16 +124,31 @@ body {
 }
 
 /* 2. Reply (#D4EFDF -> #A9DFBF) */
-.comment-box.tag-reply { background-color: #D4EFDF !important; }
-.comment-box.tag-reply:hover { background-color: #A9DFBF !important; }
+.comment-box.tag-reply { 
+    background-color: #D4EFDF !important; 
+    border-style: dashed; /* Membedakan visual tipe balasan */
+}
+.comment-box.tag-reply:hover { 
+    background-color: #A9DFBF !important; 
+    transform: translate(-6px, -6px);
+    box-shadow: 8px 8px 0px #000000;
+}
 
 /* 3. JustListen (#FADBD8 -> #F5B7B1) */
 .comment-box.tag-listen { background-color: #FADBD8 !important; }
-.comment-box.tag-listen:hover { background-color: #F5B7B1 !important; }
+.comment-box.tag-listen:hover { 
+    background-color: #F5B7B1 !important; 
+    transform: translate(-6px, -6px);
+    box-shadow: 8px 8px 0px #000000;
+}
 
 /* 4. QnA (#D6EAF8 -> #AED6F1) */
 .comment-box.tag-qna { background-color: #D6EAF8 !important; }
-.comment-box.tag-qna:hover { background-color: #AED6F1 !important; }
+.comment-box.tag-qna:hover { 
+    background-color: #AED6F1 !important; 
+    transform: translate(-6px, -6px);
+    box-shadow: 8px 8px 0px #000000;
+}
 
 
 /* --- MEKANISME HIDE/SHOW TEXT --- */
@@ -164,8 +185,13 @@ body {
 }
 
 .comment-box img {
-    width: 100%; height: 200px; object-fit: cover;
-    border-radius: 6px; margin-bottom: 15px; border: 1px solid #000;
+    width: 100%; 
+    height: auto; /* Mengubah ukuran tinggi menjadi proporsional */
+    max-height: 260px; /* Batasi tinggi gambar maksimal agar layout tetap simetris */
+    object-fit: cover;
+    border-radius: 6px; 
+    margin-bottom: 15px; 
+    border: 1px solid #000;
 }
 
 .reset-btn {
