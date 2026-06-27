@@ -18,27 +18,35 @@ function parseCSV(text) {
     return rows;
 }
 
-// FUNGSI KRITIKAL: Mengubah Link Drive menjadi Gambar
+// FUNGSI BARU: Mengamankan teks dari karakter HTML liar yang merusak struktur pembungkus tag (div)
+function escapeHTML(str) {
+    if (!str) return '';
+    return str.replace(/&/g, "&amp;")
+              .replace(/</g, "&lt;")
+              .replace(/>/g, "&gt;")
+              .replace(/"/g, "&quot;")
+              .replace(/'/g, "&#039;");
+}
+
 function convertDriveLink(url) {
     if (!url) return '';
     let fileId = '';
-    // Pola 1: /d/ID/view
     const matchD = url.match(/\/d\/(.*?)\//);
-    // Pola 2: ?id=ID
     const matchId = url.match(/[?&]id=([^&]+)/);
     
     if (matchD) fileId = matchD[1];
     else if (matchId) fileId = matchId[1];
     
-    // Jika itu link Google Drive, ubah ke format Thumbnail Resolusi Tinggi
     if (url.includes('drive.google.com')) {
         return `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`;
     }
-    return url; // Jika link gambar biasa (direct link), biarkan saja
+    return url;
 }
 
 function renderComments(dataArray, isFiltering = false, tagLabel = "") {
     const container = document.getElementById('comments');
+    if (!container) return;
+    
     const groups = { "Today": [], "Yesterday": [], "Past": [] };
     
     const oldBtn = document.getElementById('reset-filter');
@@ -54,6 +62,8 @@ function renderComments(dataArray, isFiltering = false, tagLabel = "") {
     }
 
     dataArray.forEach((item) => {
+        if (!item.content) return;
+
         const contentLower = item.content.toLowerCase();
         let categoryClass = '';
         if (contentLower.includes('#reply')) categoryClass = 'tag-reply';
@@ -63,16 +73,14 @@ function renderComments(dataArray, isFiltering = false, tagLabel = "") {
         let rawContent = item.content;
         let extractedImgHTML = '';
         
-        // Pattern untuk mendeteksi URL (termasuk Drive)
         const urlPattern = /(https?:\/\/[^\s]+)/gi;
         const foundUrls = rawContent.match(urlPattern);
 
         if (foundUrls) {
             foundUrls.forEach(link => {
-                // Periksa apakah ini link gambar atau Google Drive
                 if (link.match(/\.(jpeg|jpg|gif|png)$/i) || link.includes('drive.google.com')) {
                     extractedImgHTML += `<img src="${convertDriveLink(link)}" onclick="openImage(this.src)" style="margin-top:15px; width:100%; border-radius:8px; border:1px solid #000; cursor:zoom-in;">`;
-                    rawContent = rawContent.replace(link, ''); // Hapus link dari teks
+                    rawContent = rawContent.replace(link, ''); 
                 }
             });
         }
@@ -80,9 +88,18 @@ function renderComments(dataArray, isFiltering = false, tagLabel = "") {
         const tagMatches = rawContent.match(/#\w+/g);
         let tagsHTML = tagMatches ? `<div class="tag-container">${tagMatches.map(t => `<span class="tag" onclick="filterByTag('${t}')">${t}</span>`).join('')}</div>` : '';
         
-        let contentClean = rawContent.replace(/#\w+/g, '').trim();
+        // Bersihkan tagar kategori makro agar tampilan teks bersih
+        let contentClean = rawContent
+            .replace(/#reply/gi, '')
+            .replace(/#justlisten/gi, '')
+            .replace(/#qna/gi, '')
+            .trim();
+
+        // Amankan teks dari karakter break-code sebelum dimasukkan ke elemen HTML
+        contentClean = escapeHTML(contentClean);
         const needsReadMore = contentClean.length > 200;
 
+        // Menyusun string HTML dengan penutupan tag div secara rigid (simetris)
         const card = `
             <div class="comment-box ${categoryClass}">
                 ${tagsHTML}
@@ -94,7 +111,7 @@ function renderComments(dataArray, isFiltering = false, tagLabel = "") {
                     <button class="reaction-btn" onclick="addReaction(this, ${item.originalRow}, 'hug')">😭 <span>${item.hug}</span></button>
                     <button class="reaction-btn" onclick="addReaction(this, ${item.originalRow}, 'idea')">🫠 <span>${item.idea}</span></button>
                 </div>
-            </div>`;
+            </div>`.trim();
 
         const group = getDateGroup(item.time);
         if (groups[group]) groups[group].push(card);
@@ -102,7 +119,7 @@ function renderComments(dataArray, isFiltering = false, tagLabel = "") {
 
     let html = '';
     ["Today", "Yesterday", "Past"].forEach(g => {
-        if (groups[g]?.length > 0) {
+        if (groups[g] && groups[g].length > 0) {
             if (!isFiltering) html += `<div class="section-title">${g}</div>`;
             html += `<div class="grid">${groups[g].join('')}</div>`;
         }
@@ -112,8 +129,10 @@ function renderComments(dataArray, isFiltering = false, tagLabel = "") {
 
 function toggleExpand(btn) {
     const box = btn.parentElement;
-    const isExpanded = box.classList.toggle('expanded');
-    btn.innerText = isExpanded ? "Sembunyikan-" : "Lihat Selengkapnya+";
+    if (box) {
+        const isExpanded = box.classList.toggle('expanded');
+        btn.innerText = isExpanded ? "Sembunyikan-" : "Lihat Selengkapnya+";
+    }
 }
 
 function getDateGroup(dateStr) {
@@ -126,19 +145,25 @@ function getDateGroup(dateStr) {
     return "Past";
 }
 
-function filterByTag(tag) { renderComments(allCommentsData.filter(i => i.content.toLowerCase().includes(tag.toLowerCase())), true, tag); }
+function filterByTag(tag) { 
+    renderComments(allCommentsData.filter(i => i.content.toLowerCase().includes(tag.toLowerCase())), true, tag); 
+}
 
 function openImage(src) { 
     const modal = document.getElementById('imageModal');
     const fullImg = document.getElementById('fullImage');
-    modal.style.display = 'flex'; 
-    fullImg.src = src; 
+    if (modal && fullImg) {
+        modal.style.display = 'flex'; 
+        fullImg.src = src; 
+    }
 }
 
 function addReaction(btn, rowIndex, type) {
     const span = btn.querySelector('span');
-    span.innerText = parseInt(span.innerText) + 1;
-    fetch(`${webAppURL}?action=addReaction&row=${rowIndex}&type=${type}`);
+    if (span) {
+        span.innerText = parseInt(span.innerText) + 1;
+        fetch(`${webAppURL}?action=addReaction&row=${rowIndex}&type=${type}`).catch(e => console.error(e));
+    }
 }
 
 async function loadComments() {
