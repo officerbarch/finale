@@ -7,14 +7,22 @@ body {
     padding-bottom: 80px;
     background-color: #ffffff;
     
-    /* SOLUSI: Membuat grid efek garis putus-putus (dashed) vertikal & horizontal */
+    /* SOLUSI: Menggunakan teknik top-left masking untuk menghasilkan grid dashed yang clean */
     background-image: 
-        repeating-linear-gradient(90deg, rgba(111,110,109,0.5) 0px, rgba(111,110,109,0.5) 2px, transparent 2px, transparent 8px),
-        repeating-linear-gradient(0deg, rgba(111,110,109,0.5) 0px, rgba(111,110,109,0.5) 2px, transparent 2px, transparent 8px);
+        linear-gradient(90deg, rgba(111,110,109,0.4) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(111,110,109,0.4) 1px, transparent 1px);
     background-size: 30px 40px;
     background-position: center;
+    
+    /* Trik CSS untuk memotong grid solid di atas menjadi efek dashed/putus-putus */
+    background-clip: border-box;
+    mask-image: 
+        repeating-linear-gradient(90deg, #000 0px, #000 4px, transparent 4px, transparent 8px),
+        repeating-linear-gradient(0deg, #000 0px, #000 4px, transparent 4px, transparent 8px);
+    -webkit-mask-image: 
+        repeating-linear-gradient(90deg, #000 0px, #000 4px, transparent 4px, transparent 8px),
+        repeating-linear-gradient(0deg, #000 0px, #000 4px, transparent 4px, transparent 8px);
 }
-
 .container {
     max-width: 1000px;
     margin: 40px auto;
