@@ -18,7 +18,7 @@ function parseCSV(text) {
     return rows;
 }
 
-// Mengamankan teks dari karakter HTML liar agar struktur div tidak runtuh
+// Sanitasi teks dari tag HTML asing agar kestabilan DOM kontainer terjaga
 function escapeHTML(str) {
     if (!str) return '';
     return str.replace(/&/g, "&amp;")
@@ -28,6 +28,7 @@ function escapeHTML(str) {
               .replace(/'/g, "&#039;");
 }
 
+// Konversi tautan Google Drive menjadi Direct Thumbnail Resolusi Tinggi
 function convertDriveLink(url) {
     if (!url) return '';
     let fileId = '';
@@ -73,31 +74,50 @@ function renderComments(dataArray, isFiltering = false, tagLabel = "") {
         let rawContent = item.content;
         let extractedImgHTML = '';
         
-        // Deteksi dan ekstraksi URL Gambar/Drive
+        // Deteksi seluruh tautan (URL) di dalam string komentar
         const urlPattern = /(https?:\/\/[^\s]+)/gi;
         const foundUrls = rawContent.match(urlPattern);
 
         if (foundUrls) {
             foundUrls.forEach(link => {
-                if (link.match(/\.(jpeg|jpg|gif|png)$/i) || link.includes('drive.google.com')) {
-                    extractedImgHTML += `<img src="${convertDriveLink(link)}" onclick="openImage(this.src)" style="margin-top:15px; width:100%; border-radius:8px; border:1px solid #000; cursor:zoom-in;">`;
+                let finalSrc = '';
+
+                // Kondisi A: Tautan Google Drive
+                if (link.includes('drive.google.com')) {
+                    finalSrc = convertDriveLink(link);
+                } 
+                // Kondisi B: Tautan Halaman Imgflip
+                else if (link.includes('imgflip.com/i/')) {
+                    const match = link.match(/\/i\/(.+)/);
+                    if (match) finalSrc = `https://i.imgflip.com/${match[1]}.jpg`;
+                }
+                // Kondisi C: Ekstensi Gambar Umum/Universal
+                else if (link.match(/\.(jpeg|jpg|gif|png|webp|svg)$/i)) {
+                    finalSrc = link;
+                }
+                // Kondisi D: Tautan Dinamis yang mengandung kata kunci aset gambar
+                else if (link.includes('images') || link.includes('img') || link.includes('photo')) {
+                    finalSrc = link;
+                }
+
+                // Jika terbukti tautan visual, ekstrak menjadi tag img dan potong link teksnya
+                if (finalSrc) {
+                    extractedImgHTML += `<img src="${finalSrc}" onclick="openImage(this.src)" style="margin-top:15px; width:100%; border-radius:8px; border:1px solid #000; cursor:zoom-in;">`;
                     rawContent = rawContent.replace(link, ''); 
                 }
             });
         }
 
-        // 1. Ambil semua hashtag untuk dijadikan blok visual tombol
+        // Ekstraksi tagar menjadi blok tombol visual independen di atas teks
         const tagMatches = rawContent.match(/#\w+/g);
         let tagsHTML = tagMatches ? `<div class="tag-container">${tagMatches.map(t => `<span class="tag" onclick="filterByTag('${t}')">${t}</span>`).join('')}</div>` : '';
         
-        // 2. PERBAIKAN UTAMA: Hapus SEMUA hashtag dari teks agar tidak muncul lagi di body text
+        // Hapus total semua tagar dari teks tubuh utama agar tampilan bersih dan tidak berulang
         let contentClean = rawContent.replace(/#\w+/g, '').trim();
 
-        // 3. Amankan teks yang tersisa dari karakter HTML break-code
         contentClean = escapeHTML(contentClean);
         const needsReadMore = contentClean.length > 200;
 
-        // Menyusun komponen kartu dengan struktur penutupan tag yang rigid
         const card = `
             <div class="comment-box ${categoryClass}">
                 ${tagsHTML}
