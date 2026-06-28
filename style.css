@@ -124,7 +124,7 @@ body {
 /* 2. Reply (#D4EFDF) */
 .comment-box.tag-reply { 
     background-color: #D4EFDF !important; 
-    border-style: dashed; /* Memberikan aksen garis putus-putus untuk balasan */
+    border-style: solid; /* Memberikan aksen garis putus-putus untuk balasan */
     margin-top: 5px;
 }
 .comment-box.tag-reply:hover { 
