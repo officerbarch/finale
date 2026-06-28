@@ -156,11 +156,25 @@ function toggleExpand(btn) {
 function getDateGroup(dateStr) {
     const d = new Date(dateStr);
     if (isNaN(d)) return "Past";
+    
     const now = new Date();
-    const diffDays = Math.floor((now - d) / (1000 * 60 * 60 * 24));
-    if (diffDays < 1 && now.getDate() === d.getDate()) return "Today";
-    if (diffDays <= 1) return "Yesterday";
-    return "Past";
+
+    // Buat objek tanggal baru yang diatur ke pukul 00:00:00 untuk perbandingan murni tanggal
+    const postDate = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    const todayDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    
+    // Menghitung selisih hari yang murni berdasarkan kalender (bukan jam/menit)
+    const diffTime = todayDate - postDate;
+    const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) {
+        return "Today";
+    } else if (diffDays === 1) {
+        return "Yesterday";
+    } else {
+        return "Past";
+    }
+
 }
 
 function filterByTag(tag) { 
